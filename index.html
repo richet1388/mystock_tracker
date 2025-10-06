@@ -442,7 +442,20 @@
 
             function saveDataToFirebase() {
                 if (!dbRef) return;
-                dbRef.set(appData)
+
+                // 創建一個 appData 的深層複製來進行修改，避免影響到當前的本地狀態
+                const dataToSave = JSON.parse(JSON.stringify(appData));
+
+                // 在儲存前，將所有值為空陣列[]的帳戶，轉換回佔位符''
+                for (const accountName in dataToSave.accounts) {
+                    const transactions = dataToSave.accounts[accountName];
+                    if (Array.isArray(transactions) && transactions.length === 0) {
+                        dataToSave.accounts[accountName] = ''; // 將空陣列改回佔位符
+                    }
+                }
+
+                // 將處理過的、安全的資料物件儲存到 Firebase
+                dbRef.set(dataToSave)
                     .catch(error => console.error("資料儲存失敗:", error));
             }
 
