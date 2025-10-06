@@ -416,6 +416,21 @@
                             appData.accounts[accountName] = [];
                         }
                     }
+                    // 資料遷移和清理 (與您原本的邏輯相同)
+                    for (const accountName in appData.accounts) {
+                        if(appData.accounts[accountName] && Array.isArray(appData.accounts[accountName])){
+                            appData.accounts[accountName].forEach(tx => {
+                                if (!tx.name) tx.name = stockNameMap[tx.symbol] || '';
+                            });
+                        } else {
+                            // 處理佔位符或舊資料格式問題
+                            if (appData.accounts[accountName] === '') {
+                                appData.accounts[accountName] = []; // 將佔位符轉換回空陣列
+                            } else {
+                                appData.accounts[accountName] = [];
+                            }
+                        }
+                    }
                     cleanupExpiredTransactions(); 
                     
                     const isCollapsed = localStorage.getItem('isFormCollapsed_SharesOnly') === 'true';
@@ -915,7 +930,7 @@
                     showModal(messageModal, '錯誤', '該帳戶名稱已存在。');
                     return;
                 }
-                appData.accounts[newAccountName] = [];
+                appData.accounts[newAccountName] = ''; // 使用空字串 '' 作為佔位符
                 appData.currentAccount = newAccountName;
                 saveDataToFirebase();
                 newAccountNameInput.value = '';
