@@ -407,15 +407,7 @@
                         }
                     }
                     
-                    for (const accountName in appData.accounts) {
-                        if(appData.accounts[accountName] && Array.isArray(appData.accounts[accountName])){
-                            appData.accounts[accountName].forEach(tx => {
-                                if (!tx.name) tx.name = stockNameMap[tx.symbol] || '';
-                            });
-                        } else {
-                            appData.accounts[accountName] = [];
-                        }
-                    }
+
                     // 資料遷移和清理 (與您原本的邏輯相同)
                     for (const accountName in appData.accounts) {
                         if(appData.accounts[accountName] && Array.isArray(appData.accounts[accountName])){
