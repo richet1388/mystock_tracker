@@ -72,7 +72,7 @@
         
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈雲端儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">專注於追蹤持股總數</p>
+            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥</p>
         </header>
 
         <main class="space-y-8">
@@ -81,15 +81,15 @@
                 <label for="account-filter" class="block text-sm font-medium text-stone-300 mb-2">目前帳戶</label>
                 <div class="flex items-center space-x-2">
                     <select id="account-filter" class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
-                    <button id="add-account-btn" class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋ 新增</button>
-                    <button id="edit-account-btn" class="flex-shrink-0 bg-stone-500 hover:bg-stone-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">✏️ 修改名稱</button>
-                    <button id="delete-account-btn" class="flex-shrink-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md hidden">－ 刪除</button>
+                    <button id="add-account-btn" class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋</button>
+                    <button id="edit-account-btn" class="flex-shrink-0 bg-stone-500 hover:bg-stone-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">✏️</button>
+                    <button id="delete-account-btn" class="flex-shrink-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md hidden">－</button>
                 </div>
             </div>
 
             <!-- 總覽與篩選區塊 -->
             <div class="bg-stone-800 p-6 rounded-2xl shadow-lg border border-stone-700 space-y-4">
-                <h2 id="view-title" class="text-2xl font-bold text-stone-100 tracking-tight">投資組合總覽</h2>
+                <h2 id="view-title" class="text-2xl font-bold text-stone-100 tracking-tight">總覽</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end">
                     <div>
                         <label for="stock-search" class="block text-sm font-medium text-stone-300 mb-2">搜尋或選擇檢視項目</label>
@@ -157,7 +157,7 @@
                                         <input type="number" id="sell-shares" min="0" step="any" required placeholder="500" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-rose-400 focus:border-rose-400 text-stone-300 p-2.5">
                                     </div>
                                 </div>
-                                <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">新增賣出</button>
+                                <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">賣出</button>
                             </form>
                         </div>
                     </div>
@@ -770,7 +770,7 @@
                 // --- 情況二：顯示「個別股票」的交易歷史 ---
                 } else {
                     const stockName = (currentTransactions.find(tx => tx.symbol === selectedValue) || {}).name || '';
-                    viewTitle.textContent = `個別股票檢視: ${selectedValue} ${stockName}`;
+                    viewTitle.textContent = `個別檢視: ${selectedValue} ${stockName}`;
                     sharesTitle.textContent = '持有股數';
                     historyTitle.textContent = '交易歷史紀錄';
                     calculateSummary(selectedValue, currentTransactions); // 計算單一股票的持有股數
