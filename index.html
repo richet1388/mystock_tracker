@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📈持股儀表板📊 (雲端同步版)</title>
+    <title>📈雲端儀表板📊</title>
+    <link rel="icon" href="ElienOnly.ico" type="image/ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -48,15 +49,17 @@
             font-size: 0.85rem; /* 等同於 Tailwind 的 text-xs */
         }
     </style>
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
 </head>
 <body class="antialiased">
 
+    <!-- Login/Auth Section -->
     <div id="auth-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl text-center">
-        <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈持股儀表板📊</h1>
-        <p class="mt-4 text-stone-400">使用 Google 帳戶登入以跨裝置同步您的持股資料</p>
+        <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈雲端儀表板📊</h1>
+        <p class="mt-4 text-stone-400">使用 Google 帳戶登入以跨裝置同步資料</p>
         <button id="login-btn" class="mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300 shadow-lg">使用 Google 登入</button>
     </div>
 
@@ -67,8 +70,8 @@
         </div>
         
         <header class="text-center mb-8">
-            <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈持股儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">專注於追蹤您的持股總數</p>
+            <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈雲端儀表板📊</h1>
+            <p class="mt-2 text-lg text-stone-400">專注於追蹤持股總數</p>
         </header>
 
         <main class="space-y-8">
@@ -76,9 +79,9 @@
                 <label for="account-filter" class="block text-sm font-medium text-stone-300 mb-2">目前帳戶</label>
                 <div class="flex items-center space-x-2">
                     <select id="account-filter" class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
-                    <button id="add-account-btn" class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋ New</button>
-                    <button id="edit-account-btn" class="flex-shrink-0 bg-stone-500 hover:bg-stone-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">✏️</button>
-                    <button id="delete-account-btn" class="flex-shrink-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md hidden">－ X</button>
+                    <button id="add-account-btn" class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋ 新增</button>
+                    <button id="edit-account-btn" class="flex-shrink-0 bg-stone-500 hover:bg-stone-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">✏️ 修改名稱</button>
+                    <button id="delete-account-btn" class="flex-shrink-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md hidden">－ 刪除</button>
                 </div>
             </div>
 
@@ -278,7 +281,7 @@
             <h3 class="text-lg font-semibold text-amber-400">確認清除紀錄</h3>
             <p id="clear-history-message" class="mt-2 text-sm text-stone-300"></p>
             <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" id="clear-history-later-btn" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">否 (10天後清除)</button>
+                <button type="button" id="clear-history-later-btn" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">否 (3天後清除)</button>
                 <button type="button" id="clear-history-now-btn" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">是 (立即清除)</button>
             </div>
         </div>
@@ -301,8 +304,8 @@
             firebase.initializeApp(firebaseConfig);
             const auth = firebase.auth();
             const db = firebase.database();
-            let user = null; // 存放當前使用者資訊
-            let dbRef = null; // 存放資料庫參照
+            let user = null; 
+            let dbRef = null;
 
             // --- DOM 元素宣告 ---
             const addBuyForm = document.getElementById('add-buy-form');
@@ -398,29 +401,32 @@
                     if (storedData && storedData.accounts) {
                         appData = storedData;
                     } else {
-                        appData = { accounts: { '預設帳戶': [] }, currentAccount: '預設帳戶' };
+                        appData = { accounts: { '預設帳戶': '' }, currentAccount: '預設帳戶' };
                     }
                      if (!appData.accounts[appData.currentAccount]) {
                         appData.currentAccount = Object.keys(appData.accounts)[0] || '預設帳戶';
                         if (!appData.accounts[appData.currentAccount]) {
-                             appData.accounts['預設帳戶'] = [];
+                             appData.accounts['預設帳戶'] = '';
                         }
                     }
                     
-
-                    // 資料遷移和清理 (與您原本的邏輯相同)
+                    // 資料遷移和清理
                     for (const accountName in appData.accounts) {
                         if(appData.accounts[accountName] && Array.isArray(appData.accounts[accountName])){
                             appData.accounts[accountName].forEach(tx => {
                                 if (!tx.name) tx.name = stockNameMap[tx.symbol] || '';
+                                // [新增功能] 為舊資料加上 reviewed 屬性
+                                if (tx.reviewed === undefined) {
+                                    tx.reviewed = false;
+                                }
                             });
                         } else {
                             // 處理佔位符或舊資料格式問題
-                            if (appData.accounts[accountName] === '') {
-                                appData.accounts[accountName] = []; // 將佔位符轉換回空陣列
-                            } else {
-                                appData.accounts[accountName] = [];
-                            }
+                             if (appData.accounts[accountName] === '') {
+                                 appData.accounts[accountName] = []; // 將佔位符轉換回空陣列
+                             } else {
+                                 appData.accounts[accountName] = [];
+                             }
                         }
                     }
                     cleanupExpiredTransactions(); 
@@ -442,19 +448,13 @@
 
             function saveDataToFirebase() {
                 if (!dbRef) return;
-
-                // 創建一個 appData 的深層複製來進行修改，避免影響到當前的本地狀態
                 const dataToSave = JSON.parse(JSON.stringify(appData));
-
-                // 在儲存前，將所有值為空陣列[]的帳戶，轉換回佔位符''
                 for (const accountName in dataToSave.accounts) {
                     const transactions = dataToSave.accounts[accountName];
                     if (Array.isArray(transactions) && transactions.length === 0) {
-                        dataToSave.accounts[accountName] = ''; // 將空陣列改回佔位符
+                        dataToSave.accounts[accountName] = ''; 
                     }
                 }
-
-                // 將處理過的、安全的資料物件儲存到 Firebase
                 dbRef.set(dataToSave)
                     .catch(error => console.error("資料儲存失敗:", error));
             }
@@ -481,6 +481,8 @@
                 const now = Date.now();
                 for (const accountName in appData.accounts) {
                     const transactions = appData.accounts[accountName];
+                    if (!Array.isArray(transactions)) continue;
+
                     const symbolsWithExpiredTimestamp = [...new Set(
                         transactions
                             .filter(tx => tx.deletionTimestamp && tx.deletionTimestamp <= now)
@@ -523,6 +525,8 @@
                 const currentTransactions = appData.accounts[appData.currentAccount] || [];
                 const selectedValue = stockFilter.value;
                 const searchTerm = stockSearch.value.trim().toUpperCase();
+                
+                if (!Array.isArray(currentTransactions)) return;
 
                 let symbols = [...new Set(currentTransactions.map(tx => tx.symbol))];
                 
@@ -587,6 +591,7 @@
             deleteAccountCancelBtn.addEventListener('click', () => hideModal(deleteAccountModal));
             
             function getCurrentHoldings(symbol, transactions) {
+                if (!Array.isArray(transactions)) return [];
                 const activeTransactions = transactions.filter(tx => !tx.deletionTimestamp);
                 const symbolTxs = activeTransactions.filter(tx => tx.symbol === symbol);
                 const buyTxs = symbolTxs.filter(tx => tx.type === 'BUY').sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -611,6 +616,8 @@
 
             function renderPortfolioChart() {
                 const currentTransactions = appData.accounts[appData.currentAccount] || [];
+                if (!Array.isArray(currentTransactions)) return;
+
                 const symbols = [...new Set(currentTransactions.map(tx => tx.symbol))];
                 
                 const chartData = symbols.map(symbol => {
@@ -696,6 +703,8 @@
 
             function render() {
                 const currentTransactions = appData.accounts[appData.currentAccount] || [];
+                if (!Array.isArray(currentTransactions)) return;
+                
                 const selectedValue = stockFilter.value;
                 const tableHead = transactionList.parentElement.querySelector('thead');
                 transactionList.innerHTML = '';
@@ -755,6 +764,7 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">日期</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">類型</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">股數</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">更新狀態</th>
                             <th scope="col" class="relative px-6 py-3"><span class="sr-only">操作</span></th>
                         </tr>
                     `;
@@ -771,16 +781,25 @@
                     paginatedTransactions.forEach(tx => {
                         const row = document.createElement('tr');
                         row.className = 'hover:bg-stone-700/50 transition-colors duration-200';
-                        let typeCell;
-                        if (tx.type === 'BUY') {
-                            typeCell = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-sky-900 text-sky-200">買入</span>`;
-                        } else {
-                            typeCell = `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-rose-900 text-rose-200">賣出</span>`;
-                        }
+                        
+                        const typeCell = tx.type === 'BUY' 
+                            ? `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-sky-900 text-sky-200">買入</span>`
+                            : `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-rose-900 text-rose-200">賣出</span>`;
+
+                        // [新增功能] 建立狀態切換按鈕
+                        const statusText = tx.reviewed ? '是' : '否';
+                        const statusColor = tx.reviewed ? 'bg-emerald-800 text-emerald-100 hover:bg-emerald-700' : 'bg-stone-600 text-stone-200 hover:bg-stone-500';
+                        const statusButtonHTML = `
+                            <button class="px-3 py-1 text-xs font-semibold rounded-full transition-colors duration-200 ${statusColor}" data-id="${tx.id}" data-action="toggle-status">
+                                ${statusText}
+                            </button>
+                        `;
+
                         row.innerHTML = `
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${tx.date}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">${typeCell}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${tx.shares.toLocaleString('en-US', {maximumFractionDigits: 8})}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm">${statusButtonHTML}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                                 <button class="text-stone-400 hover:text-stone-200" data-id="${tx.id}" data-action="edit">編輯</button>
                                 <button class="text-rose-400 hover:text-rose-500" data-id="${tx.id}" data-action="delete">刪除</button>
@@ -795,12 +814,20 @@
             }
 
             function calculateSummary(symbol, transactions) {
+                if (!Array.isArray(transactions)) {
+                    totalSharesEl.textContent = '0';
+                    return;
+                }
                 const holdings = getCurrentHoldings(symbol, transactions);
                 const totalShares = holdings.reduce((sum, tx) => sum + tx.shares, 0);
                 totalSharesEl.textContent = totalShares.toLocaleString('en-US', {maximumFractionDigits: 8});
             }
             
             function calculatePortfolioSummary(transactions) {
+                if (!Array.isArray(transactions)) {
+                    totalSharesEl.textContent = '0';
+                    return;
+                }
                 const symbols = [...new Set(transactions.map(tx => tx.symbol))];
                 let portfolioStockCount = 0;
                 symbols.forEach(symbol => {
@@ -821,7 +848,8 @@
                 const shares = parseFloat(document.getElementById('buy-shares').value);
                 if (!symbol) { showModal(messageModal, '輸入錯誤', '請輸入股票代號。'); return; }
                 if (isNaN(shares) || shares <= 0) { showModal(messageModal, '輸入錯誤', '請檢查股數是否為有效的正數。'); return; }
-                appData.accounts[appData.currentAccount].push({ id: Date.now(), type: 'BUY', symbol, name, date, shares });
+                // [新增功能] 新交易預設 reviewed 為 false
+                appData.accounts[appData.currentAccount].push({ id: Date.now(), type: 'BUY', symbol, name, date, shares, reviewed: false });
                 saveDataToFirebase();
                 addBuyForm.reset();
                 setDateToToday();
@@ -847,8 +875,8 @@
                     showModal(messageModal, '賣出失敗', `您只有 ${currentShares.toLocaleString('en-US', {maximumFractionDigits: 8})} 股，無法賣出 ${sharesToSell} 股。`);
                     return;
                 }
-
-                currentTransactions.push({ id: Date.now(), type: 'SELL', symbol, name, date, shares: sharesToSell });
+                // [新增功能] 新交易預設 reviewed 為 false
+                currentTransactions.push({ id: Date.now(), type: 'SELL', symbol, name, date, shares: sharesToSell, reviewed: false });
                 saveDataToFirebase();
                 addSellForm.reset();
                 setDateToToday();
@@ -869,18 +897,20 @@
 
             transactionList.addEventListener('click', (e) => {
                 const target = e.target;
+                if (!target.dataset.action) return;
+
                 const action = target.dataset.action;
                 const id = parseInt(target.dataset.id, 10);
+                const currentTransactions = appData.accounts[appData.currentAccount];
 
                 if (action === 'delete') {
-                    const currentTransactions = appData.accounts[appData.currentAccount];
                     appData.accounts[appData.currentAccount] = currentTransactions.filter(tx => tx.id !== id);
                     saveDataToFirebase();
                     updateStockFilterOptions();
                     currentPage = 1;
                     render();
                 } else if (action === 'edit') {
-                    const tx = appData.accounts[appData.currentAccount].find(t => t.id === id);
+                    const tx = currentTransactions.find(t => t.id === id);
                     if (tx) {
                         document.getElementById('edit-transaction-id').value = tx.id;
                         document.getElementById('edit-symbol').value = tx.symbol;
@@ -889,6 +919,14 @@
                         editModalTitle.textContent = `編輯 ${tx.symbol} (${tx.type === 'BUY' ? '買入' : '賣出'})`;
                         document.getElementById('edit-symbol').dispatchEvent(new Event('input'));
                         showModal(editTransactionModal);
+                    }
+                } else if (action === 'toggle-status') {
+                    // [新增功能] 切換 reviewed 狀態
+                    const txToUpdate = currentTransactions.find(t => t.id === id);
+                    if (txToUpdate) {
+                        txToUpdate.reviewed = !txToUpdate.reviewed; // 切換布林值
+                        saveDataToFirebase();
+                        // 不需要手動 render，Firebase 的 on('value') 會自動更新畫面
                     }
                 }
             });
@@ -935,7 +973,7 @@
                     showModal(messageModal, '錯誤', '該帳戶名稱已存在。');
                     return;
                 }
-                appData.accounts[newAccountName] = ''; // 使用空字串 '' 作為佔位符
+                appData.accounts[newAccountName] = '';
                 appData.currentAccount = newAccountName;
                 saveDataToFirebase();
                 newAccountNameInput.value = '';
@@ -1000,7 +1038,7 @@
 
             clearHistoryLaterBtn.addEventListener('click', () => {
                 if (symbolToClear) {
-                    const tenDaysInMillis = 10 * 24 * 60 * 60 * 1000;
+                    const tenDaysInMillis = 3 * 24 * 60 * 60 * 1000;
                     const deletionTimestamp = Date.now() + tenDaysInMillis;
                     const activeTransactionsForSymbol = appData.accounts[appData.currentAccount]
                         .filter(tx => tx.symbol === symbolToClear && !tx.deletionTimestamp);
@@ -1016,7 +1054,7 @@
                     updateStockFilterOptions();
                     stockFilter.value = symbolToClear;
                     render();
-                    showModal(messageModal, '已排程清除', `股票 ${symbolToClear} 的紀錄將在10天後自動清除。`);
+                    showModal(messageModal, '已排程清除', `股票 ${symbolToClear} 的紀錄將在3天後自動清除。`);
                     symbolToClear = null;
                 }
             });
@@ -1049,7 +1087,7 @@
                             const firstAccountKey = Object.keys(importedData.accounts)[0];
                             const firstTransaction = (importedData.accounts[firstAccountKey] || [])[0];
                             if(firstTransaction && 'price' in firstTransaction) {
-                                throw new Error('檔案格式不符 (此為舊版含價格資料的檔案)');
+                                throw new Error('檔案格式不符 (此為旧版含價格資料的檔案)');
                             }
                             appData = importedData;
                             saveDataToFirebase();
@@ -1156,8 +1194,7 @@
 
             // --- 程式進入點 ---
             setDateToToday();
-            // Firebase's onAuthStateChanged is the new entry point.
-
+            
             // --- 事件監聽綁定 ---
             collapsibleHeader.addEventListener('click', () => {
                 if (collapsibleContent.style.maxHeight) {
