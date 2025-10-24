@@ -50,6 +50,21 @@
         input[type=number] {
             -moz-appearance: textfield; /* Firefox */
         }
+
+        /* --- 可摺疊內容動畫 (*** 最終修正 ***) --- */
+        .collapsible-content {
+            /* 預設收合 */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out;
+        }
+        .collapsible-content.is-open {
+            /* * 當 .is-open class 被加入時，展開到內容的實際高度 
+             * "var(--content-height)" 這個變數會由下面的 JS 來設定
+            */
+            max-height: var(--content-height);
+        }
+
     </style>
 </head>
 <body class="antialiased">
@@ -69,7 +84,7 @@
         
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版v2)</p>
+            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版v1)</p>
         </header>
 
         <main class="space-y-8">
@@ -651,6 +666,7 @@
                 "00984A": "主動安聯臺灣高息",
                 "00985A": "主動野村臺灣50",
                 "00986A": "主動台新龍頭成長",
+                
 			};
             
             /**
@@ -785,14 +801,23 @@
                     // --- 清理過期的待刪除交易 ---
                     cleanupExpiredTransactions(); // (此函式內部會呼叫 saveDataToFirebase)
                     
-                    // --- 恢復摺疊狀態 (這部分仍使用 localStorage，因為它純粹是 UI 偏好，不需要跨裝置同步) ---
+                    // --- 恢復摺疊狀態 (*** 最終修正 ***) ---
                     const isCollapsed = localStorage.getItem('isFormCollapsed_SharesOnly') === 'true';
+                    
+                    // 關鍵: 
+                    // 我們在 JS 中計算一次正確的高度(即使是 0px 也沒關係)，並存為 CSS 變數
+                    // 這樣 CSS 就可以在任何時候使用它
+                    const contentHeight = collapsibleContent.scrollHeight + "px";
+                    collapsibleContent.style.setProperty('--content-height', contentHeight);
+
                     if (isCollapsed) {
-                        collapsibleContent.style.maxHeight = null;
+                        // 如果是收合狀態, 確保沒有 .is-open class
+                        collapsibleContent.classList.remove('is-open');
                         collapseIcon.style.transform = 'rotate(-90deg)';
                     } else {
-                        // *** 確保這裡沒有 setTimeout ***
-                        collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + "px"; 
+                        // 如果是展開狀態, 加上 .is-open class
+                        // 就算此時 contentHeight 是 0px, 點擊時也會被修正
+                        collapsibleContent.classList.add('is-open');
                         collapseIcon.style.transform = 'rotate(0deg)';
                     }
                     
@@ -1745,23 +1770,28 @@
             
             setDateToToday(); // 設定日期預設值 (保留)
             
-            // 綁定可摺疊區塊的點擊事件 (保留)
+            // 綁定可摺疊區塊的點擊事件 (*** 最終修正 ***)
             collapsibleHeader.addEventListener('click', () => {
                 
-                // *** 修正 ***: 
-                // 檢查區塊是否「真的」展開 (有設定 maxHeight 且不為 0px)
-                if (collapsibleContent.style.maxHeight && collapsibleContent.style.maxHeight !== "0px") {
+                // 檢查目前是否有 "is-open" class
+                if (collapsibleContent.classList.contains('is-open')) {
                     
-                    // --- 收合邏輯 ---
-                    collapsibleContent.style.maxHeight = null; // 設為 null，讓 CSS 的 max-height: 0; 生效
+                    // --- 執行收合 ---
+                    collapsibleContent.classList.remove('is-open');
                     collapseIcon.style.transform = 'rotate(-90deg)'; 
                     localStorage.setItem('isFormCollapsed_SharesOnly', 'true'); 
 
                 } else {
                     
-                    // --- 展開邏輯 ---
-                    // (適用於 null, "" 或 "0px" 狀態)
-                    collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + "px"; 
+                    // --- 執行展開 ---
+                    
+                    // *** 關鍵修正 ***:
+                    // 在 "展開" 的這一刻，我們才去抓取 scrollHeight
+                    // 這時候點擊事件發生，區塊 100% 已經被渲染，scrollHeight 絕對是正確的值
+                    const contentHeight = collapsibleContent.scrollHeight + "px";
+                    collapsibleContent.style.setProperty('--content-height', contentHeight);
+
+                    collapsibleContent.classList.add('is-open');
                     collapseIcon.style.transform = 'rotate(0deg)'; 
                     localStorage.setItem('isFormCollapsed_SharesOnly', 'false'); 
                 }
