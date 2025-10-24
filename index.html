@@ -69,7 +69,7 @@
         
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版)</p>
+            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版v2)</p>
         </header>
 
         <main class="space-y-8">
@@ -791,12 +791,9 @@
                         collapsibleContent.style.maxHeight = null;
                         collapseIcon.style.transform = 'rotate(-90deg)';
                     } else {
-                        // 否則，展開並設定正確的高度
-                        // *** 修正 ***: 使用 setTimeout 延遲執行，確保瀏覽器已計算出 scrollHeight
-                        setTimeout(() => {
-                            collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + "px"; 
-                            collapseIcon.style.transform = 'rotate(0deg)';
-                        }, 100); // 延遲 100 毫秒，通常已足夠
+                        // *** 確保這裡沒有 setTimeout ***
+                        collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + "px"; 
+                        collapseIcon.style.transform = 'rotate(0deg)';
                     }
                     
                     // --- 更新介面元件 ---
@@ -1750,11 +1747,20 @@
             
             // 綁定可摺疊區塊的點擊事件 (保留)
             collapsibleHeader.addEventListener('click', () => {
-                if (collapsibleContent.style.maxHeight) {
-                    collapsibleContent.style.maxHeight = null; 
+                
+                // *** 修正 ***: 
+                // 檢查區塊是否「真的」展開 (有設定 maxHeight 且不為 0px)
+                if (collapsibleContent.style.maxHeight && collapsibleContent.style.maxHeight !== "0px") {
+                    
+                    // --- 收合邏輯 ---
+                    collapsibleContent.style.maxHeight = null; // 設為 null，讓 CSS 的 max-height: 0; 生效
                     collapseIcon.style.transform = 'rotate(-90deg)'; 
                     localStorage.setItem('isFormCollapsed_SharesOnly', 'true'); 
+
                 } else {
+                    
+                    // --- 展開邏輯 ---
+                    // (適用於 null, "" 或 "0px" 狀態)
                     collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + "px"; 
                     collapseIcon.style.transform = 'rotate(0deg)'; 
                     localStorage.setItem('isFormCollapsed_SharesOnly', 'false'); 
