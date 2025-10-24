@@ -791,8 +791,12 @@
                         collapsibleContent.style.maxHeight = null;
                         collapseIcon.style.transform = 'rotate(-90deg)';
                     } else {
-                        collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + "px";
-                        collapseIcon.style.transform = 'rotate(0deg)';
+                        // 否則，展開並設定正確的高度
+                        // *** 修正 ***: 使用 setTimeout 延遲執行，確保瀏覽器已計算出 scrollHeight
+                        setTimeout(() => {
+                            collapsibleContent.style.maxHeight = collapsibleContent.scrollHeight + "px"; 
+                            collapseIcon.style.transform = 'rotate(0deg)';
+                        }, 100); // 延遲 100 毫秒，通常已足夠
                     }
                     
                     // --- 更新介面元件 ---
