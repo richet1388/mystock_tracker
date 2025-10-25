@@ -118,26 +118,26 @@
                         <label for="stock-search" class="block text-sm font-medium text-stone-300 mb-2">搜尋或選擇檢視項目</label>
                         <input type="text" id="stock-search" placeholder="輸入代號篩選..." class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition">
                     </div>
-                    <div class="md:col-span-5">
+                    <div class="md:col-span-4">
                         <label for="stock-filter" class="block text-sm font-medium text-transparent mb-2 select-none">.</label>
                         <select id="stock-filter" class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
                     </div>
-                    <div class="md:col-span-1">
+                    <div class="md:col-span-2">
                         <label id="shares-title" class="block text-sm font-medium text-stone-300 mb-2">全部檔數</label>
                         <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
-                            <p id="totalShares" class="text-xl font-bold text-sky-400 text-center">0</p>
+                            <p id="totalShares" class="text-lg font-bold text-sky-400 text-center">0</p>
                         </div>
                     </div>
                     <div id="avg-cost-box" class="md:col-span-2">
                         <label id="avg-cost-title" class="block text-sm font-medium text-stone-300 mb-2">平均成本</label>
                         <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
-                            <p id="avgCost" class="text-xl font-bold text-sky-400 text-center">0</p>
+                            <p id="avgCost" class="text-lg font-bold text-sky-400 text-center">0</p>
                         </div>
                     </div>
                     <div id="total-cost-box" class="md:col-span-2">
                         <label id="total-cost-title" class="block text-sm font-medium text-stone-300 mb-2">總成本</label>
                         <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
-                            <p id="totalCost" class="text-xl font-bold text-sky-400 text-center">0</p>
+                            <p id="totalCost" class="text-lg font-bold text-sky-400 text-center">0</p>
                         </div>
                     </div>
                 </div>
@@ -155,7 +155,7 @@
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                                     <div class="md:col-span-3">
                                         <label for="tx-symbol" class="block text-sm font-medium text-stone-300">股票代號</label>
-                                        <input type="text" id="tx-symbol" required placeholder="例如: 2330" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5" style="text-transform:uppercase">
+                                        <input type="text" id="tx-symbol" required placeholder="例如: 0050" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5" style="text-transform:uppercase">
                                         <small id="tx-symbol-name" class="text-stone-400 h-4 block mt-1 text-xs"></small>
                                     </div>
                                     <div class="md:col-span-3">
@@ -164,11 +164,11 @@
                                     </div>
                                     <div class="md:col-span-3">
                                         <label for="tx-shares" class="block text-sm font-medium text-stone-300">股數</label>
-                                        <input type="number" id="tx-shares" min="0" step="any" required placeholder="1000" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                                        <input type="number" id="tx-shares" min="0" step="any" required placeholder="100" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                                     </div>
                                     <div class="md:col-span-3">
                                         <label for="tx-price" class="block text-sm font-medium text-stone-300">價格(均價)</label>
-                                        <input type="number" id="tx-price" min="0" step="any" required placeholder="600.5" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                                        <input type="number" id="tx-price" min="0" step="any" required placeholder="0" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                                     </div>
                                 </div>
                             </form>
