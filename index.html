@@ -667,7 +667,60 @@
                 "00985A": "主動野村臺灣50",
                 "00986A": "主動台新龍頭成長",
                 
+                "3231": "緯創",
+                "2382": "廣達",
+                "2317": "鴻海",
+                "2330": "台積電",
+                "1904": "正隆",
+                "2002": "中鋼",
+                "2882": "國泰金",
+                "2883": "凱基金",
+                "2884": "玉山金",
+                "2887": "台新新光金",
+                "2891": "中信金",
+                "3413": "京鼎",
+                "3661": "世芯-KY",
+                "6669": "緯穎",
+                "4958": "臻鼎-KY",
+                "3019": "亞光",
+                "2377": "微星",
+                "2301": "光寶科",
+                
 			};
+
+            /**
+             * 根據交易參數計算手續費和總成本
+             * @param {number} price - 價格
+             * @param {number} shares - 股數
+             * @param {string} transactionType - 'BUY' 或 'SELL'
+             * @param {string} marketType - 'TW' 或 'US'
+             * @param {number} feeDiscount - 手續費折數(TW) 或 費率(US)
+             * @returns {{fee: number, totalTxCost: number|null}}
+             */
+            function calculateTransactionCosts(price, shares, transactionType, marketType, feeDiscount) {
+                const amount = price * shares;
+                let fee = 0;
+                let totalTxCost = null; // 預設為 null (賣出時)
+
+                if (marketType === 'TW') {
+                    fee = amount * FEE_RATE * feeDiscount; // 台股手續費
+                    if (transactionType === 'BUY') {
+                        totalTxCost = amount + fee; // 買入總成本 = 金額 + 手續費
+                    } else { // 'SELL'
+                        fee += (amount * TAX_RATE); // 賣出總費用 = 手續費 + 證交稅
+                    }
+                } else { // 'US'
+                    // 注意：這裡假設 feeDiscount 是 "費率" (例如 0.005)
+                    fee = amount * feeDiscount; 
+                    if (transactionType === 'BUY') {
+                        totalTxCost = amount + fee;
+                    } else { // 'SELL'
+                        // 美股賣出無交易稅
+                    }
+                }
+                
+                return { fee: fee, totalTxCost: totalTxCost };
+            }
             
             /**
              * *** Firebase 修改 ***:
@@ -1306,7 +1359,7 @@
                     date, 
                     shares, 
                     price, 
-                    fee: Math.round(fee * 100) / 100, 
+                    fee: fee, 
                     reviewed: false 
                 };
 
@@ -1669,27 +1722,15 @@
                 tempTxToUpdate.shares = newShares;
                 tempTxToUpdate.price = newPrice; 
 
-                const newAmount = newPrice * newShares;
-                let newFee = 0;
-                
-                if (marketType === 'TW') {
-                    newFee = newAmount * FEE_RATE * feeDiscount;
-                    if (transactionType === 'SELL') {
-                        newFee += (newAmount * TAX_RATE);
-                        tempTxToUpdate.fee = newFee;
-                        delete tempTxToUpdate.totalTxCost; 
-                    } else { // 'BUY'
-                        tempTxToUpdate.fee = newFee;
-                        tempTxToUpdate.totalTxCost = newAmount + newFee; 
-                    }
-                } else { // 'US'
-                    newFee = newAmount * feeDiscount;
-                    tempTxToUpdate.fee = newFee;
-                    if (transactionType === 'SELL') {
-                        delete tempTxToUpdate.totalTxCost; 
-                    } else { // 'BUY'
-                        tempTxToUpdate.totalTxCost = newAmount + newFee; 
-                    }
+                // *** 修改 ***: 根據市場類型重新計算費用和總成本
+                // 使用新的輔助函式計算
+                const costs = calculateTransactionCosts(newPrice, newShares, transactionType, marketType, feeDiscount);
+
+                tempTxToUpdate.fee = costs.fee;
+                if (transactionType === 'BUY') {
+                    tempTxToUpdate.totalTxCost = costs.totalTxCost;
+                } else {
+                    delete tempTxToUpdate.totalTxCost; // 賣單沒有總成本
                 }
                 
                 const affectedSymbols = new Set([originalSymbol, newSymbol]);
