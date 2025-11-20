@@ -1134,10 +1134,11 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">股票代號</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">股票名稱</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">持有股數</th>
+							<th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">均價(含費用)</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">總成本(含費用)</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">均價</th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">總成本</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">均價(含費用)</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">總成本(含費用)</th>
+                            
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">更新日期</th>
                         </tr>
                     `;
@@ -1180,12 +1181,13 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">${statusButtonHTML}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-100">${detail.symbol}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-400">${detail.name}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.totalShares.toLocaleString('en-US', {maximumFractionDigits: 8})}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.totalShares.toLocaleString('en-US', {maximumFractionDigits: 3})}</td>
                                 
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageBaseCost.toLocaleString('en-US', {maximumFractionDigits: 4})}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.baseTotalCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageCost.toLocaleString('en-US', {maximumFractionDigits: 4})}</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.totalCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageBaseCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.baseTotalCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
+                                
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-400">${detail.lastUpdateDate}</td>
                                 
                             `;
