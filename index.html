@@ -1385,7 +1385,8 @@
                 const shares = parseFloat(document.getElementById('tx-shares').value);
                 const price = parseFloat(document.getElementById('tx-price').value); 
                 const currentAccount = appData.accounts[appData.currentAccount];
-                const feeDiscount = currentAccount?.feeDiscount || 0.28; 
+                // *** 修改 ***: 使用 ?? 取代 ||，這樣 0 就不會被當成無效值
+				const feeDiscount = currentAccount?.feeDiscount ?? 0.28; 
                 const marketType = currentAccount?.marketType || 'TW';
                 
                 if (!symbol) { showModal(messageModal, '輸入錯誤', '請輸入股票代號。'); return; }
