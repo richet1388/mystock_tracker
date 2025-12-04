@@ -64,6 +64,22 @@
             */
             max-height: var(--content-height);
         }
+		
+		/* *** 新增 ***: 合併模式下的樣式控制 */
+		body.merge-mode #add-account-btn, 
+		body.merge-mode #edit-account-btn, 
+		body.merge-mode #delete-account-btn,
+		body.merge-mode #add-transaction-section, /* 隱藏整個新增交易區塊 */
+		body.merge-mode button[data-action="edit"], 
+		body.merge-mode button[data-action="delete"], 
+		body.merge-mode #import-btn {
+			display: none !important;
+		}
+
+		body.merge-mode #account-filter {
+			border-color: #6366f1; /* Indigo color */
+			color: #818cf8;
+		}
 
     </style>
 </head>
@@ -84,7 +100,7 @@
         
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版v1)</p>
+            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版v2)</p>
         </header>
 
         <main class="space-y-8">
@@ -104,7 +120,9 @@
                     <div class="md:col-span-2"> <label for="account-fee-discount" class="block text-sm font-medium text-stone-300 mb-1">手續費折數/費率</label>
                          <input type="number" id="account-fee-discount" min="0" step="any" required value="0.28" class="block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                     </div>
-                    <div class="flex items-center space-x-2 self-end md:col-span-3"> <button id="add-account-btn" title="新增帳戶" class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋</button>
+                    <div class="flex items-center space-x-2 self-end md:col-span-3">
+							<button id="merge-view-btn" title="多帳戶合併檢視" class="flex-shrink-0 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">🔗</button>
+							<button id="add-account-btn" title="新增帳戶" class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋</button>
                             <button id="edit-account-btn" title="編輯帳戶" class="flex-shrink-0 bg-stone-500 hover:bg-stone-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">✏️</button>
                             <button id="delete-account-btn" title="刪除帳戶" class="flex-shrink-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md hidden">－</button>
                     </div>
@@ -143,7 +161,7 @@
                 </div>
             </div>
 
-            <div class="bg-stone-800 rounded-2xl shadow-lg border border-stone-700">
+            <div id="add-transaction-section" class="bg-stone-800 rounded-2xl shadow-lg border border-stone-700">
                 <div id="collapsible-header" class="p-4 cursor-pointer flex justify-between items-center">
                     <h2 class="text-xl font-semibold text-stone-100">新增交易紀錄</h2>
                     <span id="collapse-icon" class="text-stone-400 transform transition-transform duration-300">▼</span>
@@ -326,6 +344,18 @@
             </div>
         </div>
     </div>
+	
+	<div id="merge-account-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+		<div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+			<h3 class="text-lg font-semibold text-stone-100 mb-4">選擇要合併計算的帳戶</h3>
+			<div id="merge-account-list" class="space-y-2 max-h-60 overflow-y-auto table-scrollbar mb-4">
+				</div>
+			<div class="flex justify-end space-x-3">
+				<button type="button" id="merge-account-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+				<button type="button" id="merge-account-confirm" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition">合併檢視</button>
+			</div>
+		</div>
+	</div>
 
     <script>
         // DOMContentLoaded 事件確保在執行腳本前，HTML 已完全載入和解析
@@ -420,7 +450,14 @@
             let debounceTimer; // 用於輸入延遲處理的計時器
             let currentUid = null; // *** Firebase 修改 ***: 儲存目前登入使用者的 UID
             let dataListener = null; // *** Firebase 修改 ***: 儲存 Firebase 監聽器
-
+			
+			const mergeViewBtn = document.getElementById('merge-view-btn'); // *** 新增 ***
+			const mergeAccountModal = document.getElementById('merge-account-modal'); // *** 新增 ***
+			const mergeAccountList = document.getElementById('merge-account-list'); // *** 新增 ***
+			const mergeAccountCancelBtn = document.getElementById('merge-account-cancel'); // *** 新增 ***
+			const mergeAccountConfirmBtn = document.getElementById('merge-account-confirm'); // *** 新增 ***
+			const MERGED_ACCOUNT_NAME = '總計合併檢視'; // *** 新增 ***
+			
             // --- 股票代號與名稱對應表 ---
             // [ ... stockNameMap 內容保持不變 ... ]
             const stockNameMap = {
@@ -901,7 +938,21 @@
                 }
                 
                 try {
-                    // 使用 'set' 將整個 appData 物件寫入使用者的路徑
+					// *** 修改開始 ***: 建立乾淨的副本，剔除合併帳戶，防止汙染雲端資料
+					const dataToSave = JSON.parse(JSON.stringify(appData));
+					
+					// 如果當前選中的是合併帳戶，存檔時將 currentAccount 指回一個真實帳戶
+					if (dataToSave.currentAccount === MERGED_ACCOUNT_NAME) {
+						 dataToSave.currentAccount = Object.keys(dataToSave.accounts).find(k => k !== MERGED_ACCOUNT_NAME) || '預設帳戶';
+					}
+
+					// 移除虛擬的合併帳戶資料
+					if (dataToSave.accounts[MERGED_ACCOUNT_NAME]) {
+						delete dataToSave.accounts[MERGED_ACCOUNT_NAME];
+					}
+					// *** 修改結束 ***
+					
+                    // 使用 dataToSave 而不是 appData 進行上傳
                     db.ref('users/' + currentUid + '/appData').set(appData)
                         .catch((error) => {
                             // 處理可能的寫入錯誤
@@ -968,14 +1019,32 @@
                     appData.accounts = { '預設帳戶': { transactions: [], feeDiscount: 0.28, marketType: 'TW' } }; 
                     appData.currentAccount = '預設帳戶';
                 }
+				
                 const accountNames = Object.keys(appData.accounts); 
+				// *** 修改開始 ***: 過濾掉合併帳戶
+				const displayNames = accountNames.filter(name => name !== MERGED_ACCOUNT_NAME);
+				// *** 修改結束 ***
                 accountFilter.innerHTML = ''; 
-                accountNames.forEach(name => {
+				
+				// *** 修改 ***: 使用 displayNames 迴圈
+                displayNames.forEach(name => {
                     const option = document.createElement('option');
                     option.value = name;
                     option.textContent = name;
                     accountFilter.appendChild(option);
                 });
+				
+				// *** 新增 ***: 如果當前是合併模式，手動加入該選項並啟用 CSS
+				if (appData.currentAccount === MERGED_ACCOUNT_NAME) {
+					const option = document.createElement('option');
+					option.value = MERGED_ACCOUNT_NAME;
+					option.textContent = `🔗 ${MERGED_ACCOUNT_NAME}`;
+					accountFilter.appendChild(option);
+					document.body.classList.add('merge-mode'); 
+				} else {
+					document.body.classList.remove('merge-mode');
+				}
+				
                 accountFilter.value = appData.currentAccount;
                 deleteAccountBtn.classList.toggle('hidden', accountNames.length <= 1);
                 updateAccountFeeDiscountDisplay(); 
@@ -1454,17 +1523,26 @@
 
             accountFilter.addEventListener('change', (e) => {
                 appData.currentAccount = e.target.value; 
+				
+				// *** 新增 ***: 切換帳戶時，如果存在殘留的合併帳戶資料，立即刪除
+				if (appData.accounts[MERGED_ACCOUNT_NAME]) {
+					delete appData.accounts[MERGED_ACCOUNT_NAME];
+				}
+				// *** 新增結束 ***
+				
                 saveDataToFirebase(); // *** Firebase 修改 *** (儲存目前選擇)
                 stockSearch.value = ''; 
                 updateAccountFeeDiscountDisplay(); 
                 updateAccountMarketTypeDisplay(); 
                 updateStockFilterOptions(); 
                 currentPage = 1; 
+				updateAccountFilterOptions(); // *** 新增 ***: 確保介面狀態即時更新(移除CSS)
                 render(); 
             });
 
             accountFeeDiscountInput.addEventListener('change', (e) => {
                  const newDiscount = parseFloat(e.target.value); 
+				 
                  if (!isNaN(newDiscount) && newDiscount >= 0 && appData.accounts[appData.currentAccount]) {
                      appData.accounts[appData.currentAccount].feeDiscount = newDiscount;
                      saveDataToFirebase(); // *** Firebase 修改 ***
@@ -1516,6 +1594,68 @@
                      currentPage++; 
                      render(); 
                  }
+            });
+			
+			// --- *** 新增 ***: 合併帳戶功能邏輯 ---
+            mergeViewBtn.addEventListener('click', () => {
+                mergeAccountList.innerHTML = ''; 
+                // 過濾掉合併帳戶本身
+                const accountNames = Object.keys(appData.accounts).filter(name => name !== MERGED_ACCOUNT_NAME);
+                
+                accountNames.forEach(name => {
+                    const div = document.createElement('div');
+                    div.className = 'flex items-center p-2 rounded hover:bg-stone-700 cursor-pointer';
+                    div.innerHTML = `
+                        <input type="checkbox" id="merge-chk-${name}" value="${name}" class="w-4 h-4 text-indigo-600 bg-stone-700 border-stone-500 rounded focus:ring-indigo-500 focus:ring-2" checked>
+                        <label for="merge-chk-${name}" class="ml-2 w-full text-sm font-medium text-stone-300 cursor-pointer select-none">${name}</label>
+                    `;
+                    mergeAccountList.appendChild(div);
+                });
+                showModal(mergeAccountModal);
+            });
+
+            mergeAccountCancelBtn.addEventListener('click', () => hideModal(mergeAccountModal));
+
+            mergeAccountConfirmBtn.addEventListener('click', () => {
+                const checkboxes = mergeAccountList.querySelectorAll('input[type="checkbox"]:checked');
+                const selectedAccounts = Array.from(checkboxes).map(cb => cb.value);
+                
+                if (selectedAccounts.length === 0) {
+                    showModal(messageModal, '提示', '請至少選擇一個帳戶進行合併。');
+                    return;
+                }
+
+                let mergedTransactions = [];
+                let baseMarketType = 'TW'; 
+                
+                selectedAccounts.forEach((accName, index) => {
+                    const acc = appData.accounts[accName];
+                    if (acc && Array.isArray(acc.transactions)) {
+                        // 複製交易紀錄
+                        const accTxs = acc.transactions.map(tx => ({ ...tx }));
+                        mergedTransactions = mergedTransactions.concat(accTxs);
+                        // 以第一個選中帳戶的市場類型作為基準
+                        if (index === 0) baseMarketType = acc.marketType || 'TW'; 
+                    }
+                });
+
+                // 建立虛擬帳戶 (此資料只存在於記憶體 appData，saveDataToFirebase 會將其過濾掉)
+                appData.accounts[MERGED_ACCOUNT_NAME] = {
+                    transactions: mergedTransactions,
+                    feeDiscount: 0, 
+                    marketType: baseMarketType
+                };
+
+                appData.currentAccount = MERGED_ACCOUNT_NAME;
+                
+                hideModal(mergeAccountModal);
+                updateAccountFilterOptions(); 
+                updateStockFilterOptions();
+                stockSearch.value = '';
+                currentPage = 1;
+                render();
+                
+                showModal(messageModal, '合併成功', `已合併 ${selectedAccounts.length} 個帳戶的資料。在此模式下無法新增或編輯交易。`);
             });
             
             addAccountForm.addEventListener('submit', (e) => {
