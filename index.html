@@ -100,7 +100,7 @@
         
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版v2)</p>
+            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版3)</p>
         </header>
 
         <main class="space-y-8">
@@ -357,6 +357,17 @@
 		</div>
 	</div>
 
+    <div id="delete-inventory-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+            <h3 class="text-lg font-semibold text-rose-400">確認刪除庫存</h3>
+            <p id="delete-inventory-message" class="mt-2 text-sm text-stone-300"></p>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button type="button" id="delete-inventory-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+                <button type="button" id="delete-inventory-confirm" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">確認刪除</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // DOMContentLoaded 事件確保在執行腳本前，HTML 已完全載入和解析
         document.addEventListener('DOMContentLoaded', () => {
@@ -457,6 +468,12 @@
 			const mergeAccountCancelBtn = document.getElementById('merge-account-cancel'); // *** 新增 ***
 			const mergeAccountConfirmBtn = document.getElementById('merge-account-confirm'); // *** 新增 ***
 			const MERGED_ACCOUNT_NAME = '總計合併檢視'; // *** 新增 ***
+            
+            const deleteInventoryModal = document.getElementById('delete-inventory-modal');
+            const deleteInventoryMessage = document.getElementById('delete-inventory-message');
+            const deleteInventoryCancelBtn = document.getElementById('delete-inventory-cancel');
+            const deleteInventoryConfirmBtn = document.getElementById('delete-inventory-confirm');
+            let inventorySymbolToDelete = null;
 			
             // --- 股票代號與名稱對應表 ---
             // [ ... stockNameMap 內容保持不變 ... ]
@@ -1210,6 +1227,7 @@
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">總成本</th>
                             
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">更新日期</th>
+                            <th scope="col" class="relative px-6 py-3"><span class="sr-only">操作</span></th>
                         </tr>
                     `;
                     
@@ -1259,6 +1277,9 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.baseTotalCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-400">${detail.lastUpdateDate}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <button class="text-rose-400 hover:text-rose-500 font-bold" data-symbol="${detail.symbol}" data-action="delete-inventory">X</button>
+                                </td>
                                 
                             `;
                             transactionList.appendChild(row); 
@@ -1520,6 +1541,26 @@
                         render(); 
                     }
                 }
+                else if (action === 'delete-inventory') {
+                    const symbol = target.dataset.symbol;
+                    inventorySymbolToDelete = symbol;
+                    deleteInventoryMessage.textContent = `您確定要刪除「${symbol}」的所有庫存資料嗎？此操作將永久刪除該股票的所有交易紀錄，且無法復原。`;
+                    showModal(deleteInventoryModal);
+                }
+            });
+
+            deleteInventoryCancelBtn.addEventListener('click', () => hideModal(deleteInventoryModal));
+            
+            deleteInventoryConfirmBtn.addEventListener('click', () => {
+                if (inventorySymbolToDelete) {
+                    const currentAccountData = appData.accounts[appData.currentAccount];
+                    if (currentAccountData && currentAccountData.transactions) {
+                         currentAccountData.transactions = currentAccountData.transactions.filter(tx => tx.symbol !== inventorySymbolToDelete);
+                         saveDataToFirebase();
+                         render();
+                    }
+                }
+                hideModal(deleteInventoryModal);
             });
 
             accountFilter.addEventListener('change', (e) => {
