@@ -28,7 +28,7 @@
             storageBucket: "stock-tracker-940de.firebasestorage.app",
             messagingSenderId: "546233071753",
             appId: "1:546233071753:web:c95d9bece5dd10aa83ae58"
-            };
+                    };
 
         // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
@@ -2457,12 +2457,24 @@
             });
 
             exportBtn.addEventListener('click', () => {
-                // 匯出功能不變，匯出的是目前載入到瀏覽器中的 appData
+                // 僅匯出持股資料 (不含日誌)
                 if (!appData.accounts || Object.keys(appData.accounts).length === 0) {
                     showModal(messageModal, '提示', '沒有可匯出的資料。');
                     return;
                 }
-                const dataStr = JSON.stringify(appData, null, 2);
+                // 建立僅含持股的匯出物件
+                const stockOnlyData = {
+                    accounts: JSON.parse(JSON.stringify(appData.accounts)),
+                    currentAccount: appData.currentAccount
+                };
+                // 移除合併帳戶
+                if (stockOnlyData.accounts[MERGED_ACCOUNT_NAME]) {
+                    delete stockOnlyData.accounts[MERGED_ACCOUNT_NAME];
+                }
+                if (stockOnlyData.currentAccount === MERGED_ACCOUNT_NAME) {
+                    stockOnlyData.currentAccount = Object.keys(stockOnlyData.accounts)[0] || '預設帳戶';
+                }
+                const dataStr = JSON.stringify(stockOnlyData, null, 2);
                 const dataBlob = new Blob([dataStr], { type: 'application/json' });
                 const url = URL.createObjectURL(dataBlob);
                 const a = document.createElement('a');
@@ -2484,15 +2496,15 @@
                     try {
                         const importedData = JSON.parse(event.target.result);
                         if (importedData.accounts && importedData.currentAccount) {
-                            appData = importedData; // 覆蓋目前的 appData
+                            // 只更新持股資料，不動日誌
+                            appData.accounts = importedData.accounts;
+                            appData.currentAccount = importedData.currentAccount;
                             currentPage = 1;
 
-                            // *** Firebase 修改 ***: 
                             // 將匯入的資料存到 Firebase
-                            // onValue 監聽器會自動偵測到這個變更，並觸發 initializeApp/render
                             saveDataToFirebase();
 
-                            showModal(messageModal, '匯入成功', '所有帳戶紀錄已成功匯入並同步至雲端。');
+                            showModal(messageModal, '匯入成功', '持股帳戶紀錄已成功匯入並同步至雲端（日誌資料未受影響）。');
                         } else {
                             throw new Error('檔案格式不符');
                         }
