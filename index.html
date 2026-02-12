@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,7 @@
     <link rel="icon" href="ElienOnly.ico" type="image/ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
@@ -27,19 +28,22 @@
             storageBucket: "stock-tracker-940de.firebasestorage.app",
             messagingSenderId: "546233071753",
             appId: "1:546233071753:web:c95d9bece5dd10aa83ae58"
-                    };
+            };
 
         // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
     </script>
-    
+
     <style>
         /* --- 莫蘭迪深色系配色 --- */
         body {
             font-family: 'Inter', 'Noto Sans TC', sans-serif;
-            background-color: #1c1917; /* 石墨棕 */
-            color: #f5f5f4; /* 暖石灰 */
+            background-color: #1c1917;
+            /* 石墨棕 */
+            color: #f5f5f4;
+            /* 暖石灰 */
         }
+
         /* [ ... 其他 style 內容 ... ] */
         /* --- 隱藏數字輸入框的上下箭頭 --- */
         input[type=number]::-webkit-inner-spin-button,
@@ -47,8 +51,10 @@
             -webkit-appearance: none;
             margin: 0;
         }
+
         input[type=number] {
-            -moz-appearance: textfield; /* Firefox */
+            -moz-appearance: textfield;
+            /* Firefox */
         }
 
         /* --- 可摺疊內容動畫 (*** 最終修正 ***) --- */
@@ -58,73 +64,155 @@
             overflow: hidden;
             transition: max-height 0.5s ease-in-out;
         }
+
         .collapsible-content.is-open {
             /* * 當 .is-open class 被加入時，展開到內容的實際高度 
              * "var(--content-height)" 這個變數會由下面的 JS 來設定
             */
             max-height: var(--content-height);
         }
-		
-		/* *** 新增 ***: 合併模式下的樣式控制 */
-		body.merge-mode #add-account-btn, 
-		body.merge-mode #edit-account-btn, 
-		body.merge-mode #delete-account-btn,
-		body.merge-mode #add-transaction-section, /* 隱藏整個新增交易區塊 */
-		body.merge-mode button[data-action="edit"], 
-		body.merge-mode button[data-action="delete"], 
-		body.merge-mode #import-btn {
-			display: none !important;
-		}
 
-		body.merge-mode #account-filter {
-			border-color: #6366f1; /* Indigo color */
-			color: #818cf8;
-		}
+        /* *** 新增 ***: 合併模式下的樣式控制 */
+        body.merge-mode #add-account-btn,
+        body.merge-mode #edit-account-btn,
+        body.merge-mode #delete-account-btn,
+        body.merge-mode #add-transaction-section,
+        /* 隱藏整個新增交易區塊 */
+        body.merge-mode button[data-action="edit"],
+        body.merge-mode button[data-action="delete"],
+        body.merge-mode #import-btn {
+            display: none !important;
+        }
 
+        body.merge-mode #account-filter {
+            border-color: #6366f1;
+            /* Indigo color */
+            color: #818cf8;
+        }
+
+        /* --- Tab 切換樣式 --- */
+        .tab-bar {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 10px 24px;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            border: 2px solid transparent;
+            background-color: #292524;
+            color: #a8a29e;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .tab-btn:hover {
+            background-color: #44403c;
+            color: #e7e5e4;
+        }
+
+        .tab-btn.tab-active {
+            background-color: #0ea5e9;
+            color: #fff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 12px rgba(14, 165, 233, 0.35);
+        }
+
+        .tab-global-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .tab-global-btn {
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid #57534e;
+            background-color: #292524;
+            color: #d6d3d1;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-global-btn:hover {
+            background-color: #44403c;
+            border-color: #78716c;
+        }
     </style>
 </head>
+
 <body class="antialiased">
 
     <div id="auth-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl text-center">
         <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈雲端儀表板📊</h1>
         <p class="mt-4 text-stone-400">使用 Google 帳戶登入以跨裝置同步持股資料</p>
-        <button id="login-btn" class="mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300 shadow-lg">使用 Google 登入</button>
+        <button id="login-btn"
+            class="mt-6 bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-lg transition duration-300 shadow-lg">使用
+            Google 登入</button>
     </div>
 
-    <div id="app-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl hidden"> 
-        
+    <div id="app-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl hidden">
+
         <div class="flex justify-between items-center mb-6">
-             <p id="user-display" class="text-sm text-stone-400"></p>
-             <button id="logout-btn" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 text-sm">登出</button>
+            <p id="user-display" class="text-sm text-stone-400"></p>
+            <button id="logout-btn"
+                class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300 text-sm">登出</button>
         </div>
-        
+
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">🇹🇼  🇺🇸 ➡️ 🥦 🔥 (雲端同步版3)</p>
+            <p class="mt-2 text-lg text-stone-400">🇹🇼 🇺🇸 ➡️ 🥦 🔥 (雲端同步版v4)</p>
         </header>
 
-        <main class="space-y-8">
+        <!-- Tab 切換列 -->
+        <div class="tab-bar mb-6">
+            <button id="tab-btn-dashboard" class="tab-btn tab-active">📈 持股儀表板</button>
+            <button id="tab-btn-journal" class="tab-btn">📅 交易日誌</button>
+            <div class="tab-global-btns">
+                <button id="global-export-btn" class="tab-global-btn" title="匯出所有資料（持股＋日誌）">📦 全部匯出</button>
+                <button id="global-import-btn" class="tab-global-btn" title="匯入所有資料（持股＋日誌）">📦 全部匯入</button>
+                <input type="file" id="global-import-file" class="hidden" accept=".json">
+            </div>
+        </div>
+
+        <!-- Tab: 持股儀表板 -->
+        <main id="tab-dashboard" class="space-y-8">
             <div class="bg-stone-800 p-4 rounded-2xl shadow-lg border border-stone-700 space-y-3">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     <div class="md:col-span-5">
                         <label for="account-filter" class="block text-sm font-medium text-stone-300 mb-1">目前帳戶</label>
-                        <select id="account-filter" class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
+                        <select id="account-filter"
+                            class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
                     </div>
                     <div class="md:col-span-2">
-                        <label for="account-market-type" class="block text-sm font-medium text-stone-300 mb-1">市場</label>
-                        <select id="account-market-type" class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition">
+                        <label for="account-market-type"
+                            class="block text-sm font-medium text-stone-300 mb-1">市場</label>
+                        <select id="account-market-type"
+                            class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition">
                             <option value="TW">台股 🇹🇼</option>
                             <option value="US">美股 🇺🇸</option>
                         </select>
                     </div>
-                    <div class="md:col-span-2"> <label for="account-fee-discount" class="block text-sm font-medium text-stone-300 mb-1">手續費折數/費率</label>
-                         <input type="number" id="account-fee-discount" min="0" step="any" required value="0.28" class="block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                    <div class="md:col-span-2"> <label for="account-fee-discount"
+                            class="block text-sm font-medium text-stone-300 mb-1">手續費折數/費率</label>
+                        <input type="number" id="account-fee-discount" min="0" step="any" required value="0.28"
+                            class="block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                     </div>
                     <div class="flex items-center space-x-2 self-end md:col-span-3">
-							<button id="merge-view-btn" title="多帳戶合併檢視" class="flex-shrink-0 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">🔗</button>
-							<button id="add-account-btn" title="新增帳戶" class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋</button>
-                            <button id="edit-account-btn" title="編輯帳戶" class="flex-shrink-0 bg-stone-500 hover:bg-stone-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">✏️</button>
-                            <button id="delete-account-btn" title="刪除帳戶" class="flex-shrink-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md hidden">－</button>
+                        <button id="merge-view-btn" title="多帳戶合併檢視"
+                            class="flex-shrink-0 bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">🔗</button>
+                        <button id="add-account-btn" title="新增帳戶"
+                            class="flex-shrink-0 bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">＋</button>
+                        <button id="edit-account-btn" title="編輯帳戶"
+                            class="flex-shrink-0 bg-stone-500 hover:bg-stone-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">✏️</button>
+                        <button id="delete-account-btn" title="刪除帳戶"
+                            class="flex-shrink-0 bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md hidden">－</button>
                     </div>
                 </div>
             </div>
@@ -133,12 +221,16 @@
                 <h2 id="view-title" class="text-2xl font-bold text-stone-100 tracking-tight">總覽</h2>
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     <div class="md:col-span-2">
-                        <label for="stock-search" class="block text-sm font-medium text-transparent mb-2">搜尋或選擇檢視項目</label>
-                        <input type="text" id="stock-search" placeholder="輸入代號篩選..." class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition">
+                        <label for="stock-search"
+                            class="block text-sm font-medium text-transparent mb-2">搜尋或選擇檢視項目</label>
+                        <input type="text" id="stock-search" placeholder="輸入代號篩選..."
+                            class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition">
                     </div>
                     <div class="md:col-span-4">
-                        <label for="stock-filter" class="block text-sm font-medium text-stone-300 mb-2 select-none">選單篩選</label>
-                        <select id="stock-filter" class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
+                        <label for="stock-filter"
+                            class="block text-sm font-medium text-stone-300 mb-2 select-none">選單篩選</label>
+                        <select id="stock-filter"
+                            class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
                     </div>
                     <div class="md:col-span-2">
                         <label id="shares-title" class="block text-sm font-medium text-stone-300 mb-2">全部檔數</label>
@@ -173,197 +265,721 @@
                                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
                                     <div class="md:col-span-3">
                                         <label for="tx-date" class="block text-sm font-medium text-stone-300">日期</label>
-                                        <input type="date" id="tx-date" required class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                                        <input type="date" id="tx-date" required
+                                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                                     </div>
                                     <div class="md:col-span-3">
-                                        <label for="tx-symbol" class="block text-sm font-medium text-stone-300">股票代號</label>
-                                        <input type="text" id="tx-symbol" required placeholder="例如: 0050" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5" style="text-transform:uppercase">
-                                        <small id="tx-symbol-name" class="text-stone-400 h-4 block mt-1 text-xs"></small>
+                                        <label for="tx-symbol"
+                                            class="block text-sm font-medium text-stone-300">股票代號</label>
+                                        <input type="text" id="tx-symbol" required placeholder="例如: 0050"
+                                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5"
+                                            style="text-transform:uppercase">
+                                        <small id="tx-symbol-name"
+                                            class="text-stone-400 h-4 block mt-1 text-xs"></small>
                                     </div>
-                                    
+
                                     <div class="md:col-span-3">
-                                        <label for="tx-shares" class="block text-sm font-medium text-stone-300">股數</label>
-                                        <input type="number" id="tx-shares" min="0" step="any" required placeholder="100" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                                        <label for="tx-shares"
+                                            class="block text-sm font-medium text-stone-300">股數</label>
+                                        <input type="number" id="tx-shares" min="0" step="any" required
+                                            placeholder="100"
+                                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                                     </div>
                                     <div class="md:col-span-3">
-                                        <label for="tx-price" class="block text-sm font-medium text-stone-300">價格(均價)</label>
-                                        <input type="number" id="tx-price" min="0" step="any" required placeholder="0" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                                        <label for="tx-price"
+                                            class="block text-sm font-medium text-stone-300">價格(均價)</label>
+                                        <input type="number" id="tx-price" min="0" step="any" required placeholder="0"
+                                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                                     </div>
                                 </div>
                             </form>
                             <div class="mt-4 grid grid-cols-2 gap-4">
-                                <button type="button" id="add-buy-btn" class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">買入</button>
-                                <button type="button" id="add-sell-btn" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">賣出</button>
+                                <button type="button" id="add-buy-btn"
+                                    class="w-full bg-sky-500 hover:bg-sky-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">買入</button>
+                                <button type="button" id="add-sell-btn"
+                                    class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-2.5 px-4 rounded-lg transition duration-300 shadow-md">賣出</button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
+
             <div class="bg-stone-800 p-6 rounded-2xl shadow-lg border border-stone-700">
                 <div class="flex flex-col sm:flex-row justify-between items-center mb-4">
                     <h2 id="history-title" class="text-xl font-semibold text-stone-100">交易歷史紀錄</h2>
                     <div class="mt-3 sm:mt-0 flex space-x-2">
-                        <button id="import-btn" class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg text-sm transition duration-300">匯入資料</button>
+                        <button id="import-btn"
+                            class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg text-sm transition duration-300">匯入資料</button>
                         <input type="file" id="import-file" class="hidden" accept=".json">
-                        <button id="export-btn" class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg text-sm transition duration-300">匯出資料</button>
+                        <button id="export-btn"
+                            class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg text-sm transition duration-300">匯出資料</button>
                     </div>
                 </div>
                 <div class="overflow-x-auto table-scrollbar">
                     <table class="min-w-full divide-y divide-stone-700">
                         <thead class="bg-stone-900">
-                            </thead>
+                        </thead>
                         <tbody id="transaction-list" class="divide-y divide-stone-700">
-                            </tbody>
+                        </tbody>
                     </table>
                     <p id="no-data-msg" class="text-center py-8 text-stone-500">尚無交易紀錄</p>
                 </div>
-                 <div id="pagination-controls" class="mt-4 flex justify-between items-center text-sm text-stone-400 hidden">
-                    <button id="prev-page-btn" class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">&lt; 上一頁</button>
+                <div id="pagination-controls"
+                    class="mt-4 flex justify-between items-center text-sm text-stone-400 hidden">
+                    <button id="prev-page-btn"
+                        class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">&lt;
+                        上一頁</button>
                     <span id="page-info">第 1 / 1 頁</span>
-                    <button id="next-page-btn" class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">下一頁 &gt;</button>
+                    <button id="next-page-btn"
+                        class="bg-stone-600 hover:bg-stone-700 text-stone-100 font-medium py-2 px-4 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed">下一頁
+                        &gt;</button>
                 </div>
             </div>
         </main>
-    </div>
-    
-    <div id="message-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
-            <h3 id="message-modal-title" class="text-lg font-semibold text-stone-100">提示</h3>
-            <p id="message-modal-message" class="mt-2 text-sm text-stone-300"></p>
-            <div class="mt-6 text-right">
-                <button id="message-modal-close" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">確認</button>
+
+        <!-- Tab: 交易日誌 -->
+        <div id="tab-journal" class="hidden">
+            <div id="journal-trade-app">
+                <style>
+                    /* =========================================
+                       Journal Trade CSS (scoped to #journal-trade-app)
+                       ========================================= */
+                    #journal-trade-app {
+                        --journal-bg-body: transparent;
+                        --journal-bg-panel: #1e293b;
+                        --journal-bg-input: #2f3633;
+                        --journal-bg-textarea: #222932;
+                        --journal-bg-hover: #475569;
+                        --journal-bg-today: #403a45;
+                        --journal-modal-bg: #1e293b;
+                        --journal-modal-overlay: rgba(0, 0, 0, 0.85);
+                        --journal-text-main: #f1f5f9;
+                        --journal-text-muted: #94a3b8;
+                        --journal-text-weekend: #f87171;
+                        --journal-border-color: #334155;
+                        --journal-accent-color: #6f86a6;
+                        --journal-highlight-border: #9a8dff;
+                        --journal-danger-color: #8a4b4b;
+                        --journal-primary-color: #4a6fa5;
+                        font-family: 'Inter', 'Microsoft JhengHei', system-ui, -apple-system, sans-serif;
+                        color: var(--journal-text-main);
+                        padding: 0;
+                        line-height: 1.5;
+                        position: relative;
+                    }
+
+                    #journal-trade-app *,
+                    #journal-trade-app *::before,
+                    #journal-trade-app *::after {
+                        box-sizing: border-box;
+                    }
+
+                    #journal-trade-app h1 {
+                        font-size: 24px;
+                        margin-bottom: 4px;
+                        margin-top: 0;
+                        color: var(--journal-text-main);
+                    }
+
+                    #journal-trade-app .container {
+                        max-width: 1200px;
+                        margin: 0 auto;
+                    }
+
+                    #journal-trade-app .top-bar {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: flex-end;
+                        margin-bottom: 20px;
+                        gap: 16px;
+                        flex-wrap: wrap;
+                    }
+
+                    #journal-trade-app .top-left-block {
+                        flex: 1;
+                        min-width: 300px;
+                    }
+
+                    #journal-trade-app .month-control {
+                        text-align: right;
+                        min-width: 200px;
+                    }
+
+                    #journal-trade-app .month-label {
+                        font-size: 20px;
+                        font-weight: 600;
+                        margin-bottom: 8px;
+                        color: #fff;
+                    }
+
+                    #journal-trade-app .month-nav {
+                        display: flex;
+                        gap: 8px;
+                        justify-content: flex-end;
+                    }
+
+                    #journal-trade-app .btn {
+                        font-size: 13px;
+                        padding: 6px 12px;
+                        border-radius: 4px;
+                        border: 1px solid var(--journal-border-color);
+                        background-color: var(--journal-bg-input);
+                        color: var(--journal-text-main);
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        display: inline-flex;
+                        align-items: center;
+                        gap: 4px;
+                        text-decoration: none;
+                        font-family: inherit;
+                    }
+
+                    #journal-trade-app .btn:hover {
+                        background-color: var(--journal-bg-hover);
+                        border-color: var(--journal-accent-color);
+                    }
+
+                    #journal-trade-app .btn-danger {
+                        border-color: var(--journal-danger-color);
+                        color: #f0dede;
+                    }
+
+                    #journal-trade-app .btn-danger:hover {
+                        background-color: #5b2f2f;
+                        border-color: #c26f6f;
+                    }
+
+                    #journal-trade-app .btn-primary {
+                        border-color: var(--journal-primary-color);
+                        background-color: #2e3b4e;
+                    }
+
+                    #journal-trade-app .btn-primary:hover {
+                        background-color: #3b4d66;
+                    }
+
+                    #journal-trade-app .hint-text {
+                        font-size: 11px;
+                        color: var(--journal-text-muted);
+                        margin-left: 8px;
+                        display: inline-block;
+                    }
+
+                    #journal-trade-app .calendar-wrapper {
+                        background-color: var(--journal-bg-panel);
+                        border-radius: 8px;
+                        padding: 16px;
+                        border: 1px solid var(--journal-border-color);
+                        margin-bottom: 40px;
+                    }
+
+                    #journal-trade-app .week-header {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        gap: 8px;
+                        margin-bottom: 8px;
+                    }
+
+                    #journal-trade-app .week-day-name {
+                        text-align: center;
+                        font-size: 14px;
+                        font-weight: bold;
+                        color: var(--journal-text-muted);
+                        padding: 8px 0;
+                    }
+
+                    #journal-trade-app .week-day-name.weekend {
+                        color: var(--journal-text-weekend);
+                    }
+
+                    #journal-trade-app .calendar-grid {
+                        display: grid;
+                        grid-template-columns: repeat(7, 1fr);
+                        gap: 1px;
+                        background-color: var(--journal-border-color);
+                        border: 1px solid var(--journal-border-color);
+                    }
+
+                    #journal-trade-app .day-cell {
+                        background-color: var(--journal-bg-panel);
+                        min-height: 120px;
+                        padding: 8px;
+                        position: relative;
+                        cursor: pointer;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 6px;
+                        transition: background-color 0.2s;
+                    }
+
+                    #journal-trade-app .day-cell:hover {
+                        background-color: var(--journal-bg-hover);
+                    }
+
+                    #journal-trade-app .day-number {
+                        font-family: monospace;
+                        font-size: 14px;
+                        color: #cac6ba;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+
+                    #journal-trade-app .day-cell.is-weekend .day-number {
+                        color: var(--journal-text-weekend);
+                    }
+
+                    #journal-trade-app .day-cell.is-today {
+                        background-color: var(--journal-bg-today);
+                    }
+
+                    #journal-trade-app .day-cell.is-today .day-number {
+                        color: #fff;
+                        font-weight: bold;
+                    }
+
+                    #journal-trade-app .day-cell.is-today::after {
+                        content: "";
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 4px;
+                        height: 100%;
+                        background-color: var(--journal-highlight-border);
+                    }
+
+                    #journal-trade-app .day-cell.other-month {
+                        opacity: 0.3;
+                        pointer-events: none;
+                        background-color: var(--journal-bg-input);
+                    }
+
+                    #journal-trade-app .more-indicator {
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        width: 0;
+                        height: 0;
+                        border-style: solid;
+                        border-width: 0 12px 12px 0;
+                        border-color: transparent var(--journal-danger-color) transparent transparent;
+                        background-color: transparent;
+                        border-radius: 0;
+                        display: none;
+                        z-index: 5;
+                        pointer-events: none;
+                    }
+
+                    #journal-trade-app .day-cell.is-overflowing .more-indicator {
+                        display: block;
+                    }
+
+                    #journal-trade-app .day-cell:hover .more-indicator {
+                        background-color: var(--journal-highlight-border);
+                        transform: scale(1.2);
+                    }
+
+                    #journal-trade-app .note-preview {
+                        font-size: 14px;
+                        color: var(--journal-text-muted);
+                        line-height: 1.4;
+                        flex: 1;
+                        overflow: hidden;
+                        word-break: break-all;
+                        white-space: pre-wrap;
+                        display: -webkit-box;
+                        -webkit-line-clamp: 4;
+                        line-clamp: 4;
+                        -webkit-box-orient: vertical;
+                    }
+
+                    #journal-trade-app .has-note .day-number::after {
+                        content: "🎯";
+                        font-size: 12px;
+                    }
+
+                    #journal-trade-app .has-note .note-preview {
+                        color: var(--journal-text-main);
+                    }
+
+                    #journal-trade-app #journalTradeImportInput {
+                        display: none;
+                    }
+
+                    #journal-trade-app-modal.modal-overlay {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: var(--journal-modal-overlay);
+                        z-index: 1000;
+                        display: none;
+                        justify-content: center;
+                        align-items: center;
+                        backdrop-filter: blur(5px);
+                    }
+
+                    #journal-trade-app-modal .modal-box {
+                        background: var(--journal-modal-bg);
+                        border: 1px solid rgba(255, 255, 255, 0.2);
+                        padding: 24px;
+                        border-radius: 12px;
+                        width: 90%;
+                        max-width: 600px;
+                        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+                        display: flex;
+                        flex-direction: column;
+                        height: 80vh;
+                        box-sizing: border-box;
+                    }
+
+                    #journal-trade-app-modal .modal-header {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 12px;
+                    }
+
+                    #journal-trade-app-modal .modal-title {
+                        font-size: 20px;
+                        font-weight: bold;
+                        color: #fff;
+                    }
+
+                    #journal-trade-app-modal .modal-textarea {
+                        flex: 1;
+                        width: 100%;
+                        background: var(--journal-bg-textarea);
+                        border: 1px solid var(--journal-border-color);
+                        color: var(--journal-text-main);
+                        padding: 16px;
+                        border-radius: 6px;
+                        resize: none;
+                        margin-bottom: 16px;
+                        font-size: 18px;
+                        line-height: 1.6;
+                        font-family: inherit;
+                        box-sizing: border-box;
+                    }
+
+                    #journal-trade-app-modal .modal-textarea:focus {
+                        outline: none;
+                        border-color: var(--journal-accent-color);
+                    }
+
+                    #journal-trade-app-modal .modal-actions {
+                        display: flex;
+                        justify-content: flex-end;
+                        gap: 8px;
+                    }
+
+                    #journal-trade-app-modal .btn {
+                        font-size: 13px;
+                        padding: 6px 12px;
+                        border-radius: 4px;
+                        border: 1px solid var(--journal-border-color);
+                        background-color: var(--journal-bg-input);
+                        color: var(--journal-text-main);
+                        cursor: pointer;
+                        transition: all 0.2s ease;
+                        font-family: inherit;
+                    }
+
+                    #journal-trade-app-modal .btn:hover {
+                        background-color: var(--journal-bg-hover);
+                    }
+
+                    #journal-trade-app-modal .btn-danger {
+                        border-color: var(--journal-danger-color);
+                        color: #f0dede;
+                    }
+
+                    #journal-trade-app-modal .btn-danger:hover {
+                        background-color: #5b2f2f;
+                    }
+
+                    #journal-trade-app-modal .btn-primary {
+                        border-color: var(--journal-primary-color);
+                        background-color: #2e3b4e;
+                    }
+
+                    #journal-trade-app-modal .btn-primary:hover {
+                        background-color: #3b4d66;
+                    }
+
+                    @media (max-width: 768px) {
+                        #journal-trade-app .day-cell {
+                            min-height: 80px;
+                        }
+
+                        #journal-trade-app .note-preview {
+                            -webkit-line-clamp: 2;
+                            line-clamp: 2;
+                            font-size: 11px;
+                        }
+
+                        #journal-trade-app-modal .modal-box {
+                            height: 60vh;
+                        }
+                    }
+
+                    #journal-trade-app.privacy-active .note-preview {
+                        filter: blur(6px);
+                        opacity: 0.6;
+                        user-select: none;
+                        pointer-events: none;
+                        transition: filter 0.3s ease, opacity 0.3s ease;
+                    }
+
+                    #journal-trade-app.privacy-active #journalTradePrivacyBtn {
+                        background-color: var(--journal-bg-today);
+                        border-color: var(--journal-highlight-border);
+                    }
+                </style>
+
+                <div class="container">
+                    <div class="top-bar">
+                        <div class="top-left-block">
+                            <h1>📅 ARK日誌</h1>
+                            <p style="margin: 0 0 8px 0; font-size: 14px; line-height: 1.2;">
+                                🎯📣🌐📝📜🔥⚡️🚩📌📍✅❎☑️❌🔍️ 🚧 🛠️ 🚦 💰️📢⚠️⛔️🚫 ⬆️⬇️⬅️➡️ 🇹🇼 🇺🇸🥦
+                            </p>
+                            <div style="margin-top:8px;">
+                                <button class="btn btn-danger" id="journalTradeClearMonthBtn"
+                                    style="margin-right: 8px;">🗑 清除本月</button>
+                                <button class="btn" id="journalTradePrivacyBtn" style="margin-right: 8px;">👁️
+                                    顯示/隱藏</button>
+                                <button class="btn btn-primary" id="journalTradeExportBtn">⬇ 匯出日誌備份</button>
+                                <label class="btn btn-primary">⬆ 匯入日誌<input type="file" id="journalTradeImportInput"
+                                        accept=".json"></label>
+                                <span class="hint-text">日誌資料已同步至雲端。</span>
+                            </div>
+                        </div>
+                        <div class="month-control">
+                            <div class="month-label" id="journalTradeMonthLabel"></div>
+                            <div class="month-nav">
+                                <button class="btn" id="journalTradePrevMonthBtn">◀ 上個月</button>
+                                <button class="btn" id="journalTradeTodayBtn">回到本月</button>
+                                <button class="btn" id="journalTradeNextMonthBtn">下個月 ▶</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="calendar-wrapper">
+                        <div class="week-header">
+                            <div class="week-day-name weekend">日</div>
+                            <div class="week-day-name">一</div>
+                            <div class="week-day-name">二</div>
+                            <div class="week-day-name">三</div>
+                            <div class="week-day-name">四</div>
+                            <div class="week-day-name">五</div>
+                            <div class="week-day-name weekend">六</div>
+                        </div>
+                        <div class="calendar-grid" id="journalTradeCalendarGrid"></div>
+                    </div>
+                </div>
+                <div class="modal-overlay" id="journal-trade-app-modal">
+                    <div class="modal-box">
+                        <div class="modal-header">
+                            <div class="modal-title" id="journalTradeModalDateTitle">記事</div>
+                            <button class="btn btn-danger" id="journalTradeDeleteNoteBtn"
+                                style="font-size:12px;">清空當日</button>
+                        </div>
+                        <textarea class="modal-textarea" id="journalTradeNoteTextarea"
+                            placeholder="今天發生了什麼事..."></textarea>
+                        <div class="modal-actions">
+                            <button class="btn" id="journalTradeCancelNoteBtn">取消</button>
+                            <button class="btn btn-primary" id="journalTradeSaveNoteBtn">儲存紀錄</button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <div id="add-account-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+    <div id="message-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+            <h3 id="message-modal-title" class="text-lg font-semibold text-stone-100">提示</h3>
+            <p id="message-modal-message" class="mt-2 text-sm text-stone-300"></p>
+            <div class="mt-6 text-right">
+                <button id="message-modal-close"
+                    class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition duration-300">確認</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="add-account-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
             <h3 class="text-lg font-semibold text-stone-100">新增帳戶</h3>
             <form id="add-account-form" class="mt-4 space-y-4">
                 <div>
                     <label for="new-account-name" class="block text-sm font-medium text-stone-300">帳戶名稱</label>
-                    <input type="text" id="new-account-name" required class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                    <input type="text" id="new-account-name" required
+                        class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                 </div>
                 <div>
                     <label for="new-account-market-type" class="block text-sm font-medium text-stone-300">市場類型</label>
-                    <select id="new-account-market-type" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                    <select id="new-account-market-type"
+                        class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                         <option value="TW">台股 (TW)</option>
                         <option value="US">美股 (US)</option>
                     </select>
                 </div>
                 <div>
-                    <label for="new-account-fee-discount" class="block text-sm font-medium text-stone-300">手續費折數/費率</label>
-                    <input type="number" id="new-account-fee-discount" min="0" step="any" required value="0.28" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                    <label for="new-account-fee-discount"
+                        class="block text-sm font-medium text-stone-300">手續費折數/費率</label>
+                    <input type="number" id="new-account-fee-discount" min="0" step="any" required value="0.28"
+                        class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button type="button" id="add-account-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
-                    <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition">建立</button>
+                    <button type="button" id="add-account-cancel"
+                        class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+                    <button type="submit"
+                        class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition">建立</button>
                 </div>
             </form>
         </div>
     </div>
-    
-    <div id="edit-account-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+
+    <div id="edit-account-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
             <h3 class="text-lg font-semibold text-stone-100">修改帳戶</h3>
             <form id="edit-account-form" class="mt-4 space-y-4">
                 <div>
                     <label for="edit-account-name" class="block text-sm font-medium text-stone-300">新帳戶名稱</label>
-                    <input type="text" id="edit-account-name" required class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-stone-500 focus:border-stone-500 text-stone-300 p-2.5">
+                    <input type="text" id="edit-account-name" required
+                        class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-stone-500 focus:border-stone-500 text-stone-300 p-2.5">
                 </div>
                 <div>
                     <label for="edit-account-market-type" class="block text-sm font-medium text-stone-300">市場類型</label>
-                    <select id="edit-account-market-type" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-stone-500 focus:border-stone-500 text-stone-300 p-2.5">
+                    <select id="edit-account-market-type"
+                        class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-stone-500 focus:border-stone-500 text-stone-300 p-2.5">
                         <option value="TW">台股 (TW)</option>
                         <option value="US">美股 (US)</option>
                     </select>
                 </div>
-                 <div>
-                    <label for="edit-account-fee-discount" class="block text-sm font-medium text-stone-300">手續費折數/費率</label>
-                    <input type="number" id="edit-account-fee-discount" min="0" step="any" required value="0.28" class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-stone-500 focus:border-stone-500 text-stone-300 p-2.5">
+                <div>
+                    <label for="edit-account-fee-discount"
+                        class="block text-sm font-medium text-stone-300">手續費折數/費率</label>
+                    <input type="number" id="edit-account-fee-discount" min="0" step="any" required value="0.28"
+                        class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-stone-500 focus:border-stone-500 text-stone-300 p-2.5">
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button type="button" id="edit-account-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
-                    <button type="submit" class="bg-stone-500 hover:bg-stone-600 text-white font-bold py-2 px-4 rounded-lg transition">儲存</button>
+                    <button type="button" id="edit-account-cancel"
+                        class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+                    <button type="submit"
+                        class="bg-stone-500 hover:bg-stone-600 text-white font-bold py-2 px-4 rounded-lg transition">儲存</button>
                 </div>
             </form>
         </div>
     </div>
-    
-    <div id="edit-transaction-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-md w-full shadow-2xl transform scale-95">
+
+    <div id="edit-transaction-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-md w-full shadow-2xl transform scale-95">
             <h3 id="edit-modal-title" class="text-lg font-semibold text-stone-100">編輯交易紀錄</h3>
             <form id="edit-transaction-form" class="mt-4 space-y-4">
                 <input type="hidden" id="edit-transaction-id">
                 <div class="grid grid-cols-4 gap-4">
                     <div class="col-span-2">
                         <label for="edit-symbol" class="block text-sm font-medium text-stone-300">股票代號</label>
-                        <input type="text" id="edit-symbol" required class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5" style="text-transform:uppercase">
+                        <input type="text" id="edit-symbol" required
+                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5"
+                            style="text-transform:uppercase">
                         <small id="edit-symbol-name" class="text-stone-400 h-4 block mt-1 text-xs"></small>
                     </div>
                     <div class="col-span-2">
-                         <label for="edit-date" class="block text-sm font-medium text-stone-300">日期</label>
-                         <input type="date" id="edit-date" required class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                        <label for="edit-date" class="block text-sm font-medium text-stone-300">日期</label>
+                        <input type="date" id="edit-date" required
+                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                     </div>
                     <div class="col-span-2">
-                         <label for="edit-shares" class="block text-sm font-medium text-stone-300">股數</label>
-                         <input type="number" id="edit-shares" min="0" step="any" required class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                        <label for="edit-shares" class="block text-sm font-medium text-stone-300">股數</label>
+                        <input type="number" id="edit-shares" min="0" step="any" required
+                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                     </div>
                     <div class="col-span-2">
-                         <label for="edit-price" class="block text-sm font-medium text-stone-300">價格</label>
-                         <input type="number" id="edit-price" min="0" step="any" required class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
+                        <label for="edit-price" class="block text-sm font-medium text-stone-300">價格</label>
+                        <input type="number" id="edit-price" min="0" step="any" required
+                            class="mt-1 block w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5">
                     </div>
                 </div>
                 <div class="flex justify-end space-x-3">
-                    <button type="button" id="edit-transaction-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
-                    <button type="submit" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition">儲存變更</button>
+                    <button type="button" id="edit-transaction-cancel"
+                        class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+                    <button type="submit"
+                        class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg transition">儲存變更</button>
                 </div>
             </form>
         </div>
     </div>
-    
-    <div id="delete-account-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+
+    <div id="delete-account-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
             <h3 class="text-lg font-semibold text-rose-400">確認刪除帳戶</h3>
             <p id="delete-account-message" class="mt-2 text-sm text-stone-300"></p>
             <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" id="delete-account-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
-                <button type="button" id="delete-account-confirm" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">確認刪除</button>
+                <button type="button" id="delete-account-cancel"
+                    class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+                <button type="button" id="delete-account-confirm"
+                    class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">確認刪除</button>
             </div>
         </div>
     </div>
-    
-    <div id="clear-history-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+
+    <div id="clear-history-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
             <h3 class="text-lg font-semibold text-amber-400">確認清除紀錄</h3>
             <p id="clear-history-message" class="mt-2 text-sm text-stone-300"></p>
             <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" id="clear-history-later-btn" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">否 (10天後清除)</button>
-                <button type="button" id="clear-history-now-btn" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">是 (立即清除)</button>
+                <button type="button" id="clear-history-later-btn"
+                    class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">否
+                    (10天後清除)</button>
+                <button type="button" id="clear-history-now-btn"
+                    class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">是
+                    (立即清除)</button>
             </div>
         </div>
     </div>
-	
-	<div id="merge-account-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-		<div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
-			<h3 class="text-lg font-semibold text-stone-100 mb-4">選擇要合併計算的帳戶</h3>
-			<div id="merge-account-list" class="space-y-2 max-h-60 overflow-y-auto table-scrollbar mb-4">
-				</div>
-			<div class="flex justify-end space-x-3">
-				<button type="button" id="merge-account-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
-				<button type="button" id="merge-account-confirm" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition">合併檢視</button>
-			</div>
-		</div>
-	</div>
 
-    <div id="delete-inventory-modal" class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
-        <div class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+    <div id="merge-account-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
+            <h3 class="text-lg font-semibold text-stone-100 mb-4">選擇要合併計算的帳戶</h3>
+            <div id="merge-account-list" class="space-y-2 max-h-60 overflow-y-auto table-scrollbar mb-4">
+            </div>
+            <div class="flex justify-end space-x-3">
+                <button type="button" id="merge-account-cancel"
+                    class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+                <button type="button" id="merge-account-confirm"
+                    class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg transition">合併檢視</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-inventory-modal"
+        class="modal fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50 opacity-0 pointer-events-none">
+        <div
+            class="modal-content bg-stone-800 border border-stone-700 rounded-2xl p-6 max-w-sm w-full shadow-2xl transform scale-95">
             <h3 class="text-lg font-semibold text-rose-400">確認刪除庫存</h3>
             <p id="delete-inventory-message" class="mt-2 text-sm text-stone-300"></p>
             <div class="mt-6 flex justify-end space-x-3">
-                <button type="button" id="delete-inventory-cancel" class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
-                <button type="button" id="delete-inventory-confirm" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">確認刪除</button>
+                <button type="button" id="delete-inventory-cancel"
+                    class="bg-stone-600 hover:bg-stone-700 text-white font-bold py-2 px-4 rounded-lg transition">取消</button>
+                <button type="button" id="delete-inventory-confirm"
+                    class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg transition">確認刪除</button>
             </div>
         </div>
     </div>
@@ -461,24 +1077,33 @@
             let debounceTimer; // 用於輸入延遲處理的計時器
             let currentUid = null; // *** Firebase 修改 ***: 儲存目前登入使用者的 UID
             let dataListener = null; // *** Firebase 修改 ***: 儲存 Firebase 監聽器
-			
-			const mergeViewBtn = document.getElementById('merge-view-btn'); // *** 新增 ***
-			const mergeAccountModal = document.getElementById('merge-account-modal'); // *** 新增 ***
-			const mergeAccountList = document.getElementById('merge-account-list'); // *** 新增 ***
-			const mergeAccountCancelBtn = document.getElementById('merge-account-cancel'); // *** 新增 ***
-			const mergeAccountConfirmBtn = document.getElementById('merge-account-confirm'); // *** 新增 ***
-			const MERGED_ACCOUNT_NAME = '總計合併檢視'; // *** 新增 ***
-            
+
+            const mergeViewBtn = document.getElementById('merge-view-btn'); // *** 新增 ***
+            const mergeAccountModal = document.getElementById('merge-account-modal'); // *** 新增 ***
+            const mergeAccountList = document.getElementById('merge-account-list'); // *** 新增 ***
+            const mergeAccountCancelBtn = document.getElementById('merge-account-cancel'); // *** 新增 ***
+            const mergeAccountConfirmBtn = document.getElementById('merge-account-confirm'); // *** 新增 ***
+            const MERGED_ACCOUNT_NAME = '總計合併檢視'; // *** 新增 ***
+
             const deleteInventoryModal = document.getElementById('delete-inventory-modal');
             const deleteInventoryMessage = document.getElementById('delete-inventory-message');
             const deleteInventoryCancelBtn = document.getElementById('delete-inventory-cancel');
             const deleteInventoryConfirmBtn = document.getElementById('delete-inventory-confirm');
+
+            // --- Tab 切換 DOM 元素 ---
+            const tabBtnDashboard = document.getElementById('tab-btn-dashboard');
+            const tabBtnJournal = document.getElementById('tab-btn-journal');
+            const tabDashboard = document.getElementById('tab-dashboard');
+            const tabJournal = document.getElementById('tab-journal');
+            const globalExportBtn = document.getElementById('global-export-btn');
+            const globalImportBtn = document.getElementById('global-import-btn');
+            const globalImportFile = document.getElementById('global-import-file');
             let inventorySymbolToDelete = null;
-			
+
             // --- 股票代號與名稱對應表 ---
             // [ ... stockNameMap 內容保持不變 ... ]
             const stockNameMap = {
-				"0050": "元大台灣50",
+                "0050": "元大台灣50",
                 "0051": "元大中型100",
                 "0052": "富邦科技",
                 "0053": "元大電子",
@@ -713,7 +1338,7 @@
                 "009808": "華南永昌優選50",
                 "00980A": "主動野村臺灣優選",
                 "009810": "保德信全球藍籌",
-                "0D9811": "統一美國50",
+                "009811": "統一美國50",
                 "009812": "野村日本東証",
                 "00981A": "主動統一台股增長",
                 "00982A": "主動群益臺灣強棒",
@@ -721,7 +1346,7 @@
                 "00984A": "主動安聯臺灣高息",
                 "00985A": "主動野村臺灣50",
                 "00986A": "主動台新龍頭成長",
-                
+
                 "3231": "緯創",
                 "2382": "廣達",
                 "2317": "鴻海",
@@ -740,8 +1365,8 @@
                 "3019": "亞光",
                 "2377": "微星",
                 "2301": "光寶科",
-                
-			};
+
+            };
 
             /**
              * 根據交易參數計算手續費和總成本
@@ -766,17 +1391,17 @@
                     }
                 } else { // 'US'
                     // 注意：這裡假設 feeDiscount 是 "費率" (例如 0.005)
-                    fee = amount * feeDiscount; 
+                    fee = amount * feeDiscount;
                     if (transactionType === 'BUY') {
                         totalTxCost = amount + fee;
                     } else { // 'SELL'
                         // 美股賣出無交易稅
                     }
                 }
-                
+
                 return { fee: fee, totalTxCost: totalTxCost };
             }
-            
+
             /**
              * *** Firebase 修改 ***:
              * 設定 Firebase Realtime Database 的資料監聽器。
@@ -788,12 +1413,12 @@
                 if (dataListener) {
                     dataListener.off();
                 }
-                
+
                 // 設定目前使用者的 UID
                 currentUid = uid;
                 // 建立指向該使用者資料庫路徑的引用
                 const dbRef = db.ref('users/' + uid + '/appData');
-                
+
                 // *** Firebase 修改 ***: 使用 onValue 監聽資料變化 (取代 localStorage.getItem)
                 // onValue 會在初次載入和資料變更時觸發
                 dataListener = dbRef.on('value', (snapshot) => {
@@ -802,83 +1427,84 @@
                         // 如果雲端有資料，則使用它
                         storedData = snapshot.val();
                     }
-                    
+
                     // --- 初始化或載入應用程式資料 (appData) ---
                     if (storedData && storedData.accounts) {
                         appData = storedData;
                     } else {
                         // 否則，初始化一個包含預設帳戶的新資料結構
-                        appData = { 
-                            accounts: { 
-                                '預設帳戶': { transactions: [], feeDiscount: 0.28, marketType: 'TW' } 
-                            }, 
-                            currentAccount: '預設帳戶'
+                        appData = {
+                            accounts: {
+                                '預設帳戶': { transactions: [], feeDiscount: 0.28, marketType: 'TW' }
+                            },
+                            currentAccount: '預設帳戶',
+                            journal: {} // *** 新增 ***: 初始化 journal 欄位
                         };
                         // *** Firebase 修改 ***: 將新使用者的預設資料存回 Firebase
                         saveDataToFirebase();
                     }
-                    
+
                     // --- 確保目前選中的帳戶 (currentAccount) 是有效的 ---
                     if (!appData.accounts[appData.currentAccount]) {
                         appData.currentAccount = Object.keys(appData.accounts)[0] || '預設帳戶';
                         if (!appData.accounts[appData.currentAccount]) {
-                                appData.accounts['預設帳戶'] = { transactions: [], feeDiscount: 0.28, marketType: 'TW' }; 
+                            appData.accounts['預設帳戶'] = { transactions: [], feeDiscount: 0.28, marketType: 'TW' };
                         }
                     }
-                    
+
                     // --- 資料遷移與清理 ---
                     // (這段邏輯保持不變，它能確保從舊版本匯入或殘留的資料結構保持最新)
-                    let needsSave = false; 
+                    let needsSave = false;
                     for (const accountName in appData.accounts) {
-                        const accountData = appData.accounts[accountName]; 
+                        const accountData = appData.accounts[accountName];
 
                         if (Array.isArray(accountData)) {
                             console.log(`偵測到帳戶 ${accountName} 為舊格式，進行遷移...`);
-                            let initialFeeDiscount = 0.28; 
+                            let initialFeeDiscount = 0.28;
                             if (accountData.length > 0 && accountData[0].feeDiscount !== undefined) {
                                 initialFeeDiscount = accountData[0].feeDiscount;
                             }
-                            appData.accounts[accountName] = { 
-                                transactions: accountData, 
-                                feeDiscount: initialFeeDiscount, 
-                                marketType: 'TW' 
+                            appData.accounts[accountName] = {
+                                transactions: accountData,
+                                feeDiscount: initialFeeDiscount,
+                                marketType: 'TW'
                             };
-                            needsSave = true; 
-                        } 
+                            needsSave = true;
+                        }
                         else if (typeof accountData !== 'object' || accountData === null) {
-                             appData.accounts[accountName] = { transactions: [], feeDiscount: 0.28, marketType: 'TW' };
-                             needsSave = true;
-                        } 
+                            appData.accounts[accountName] = { transactions: [], feeDiscount: 0.28, marketType: 'TW' };
+                            needsSave = true;
+                        }
                         else {
-                             if (!Array.isArray(accountData.transactions)) {
+                            if (!Array.isArray(accountData.transactions)) {
                                 accountData.transactions = [];
                                 needsSave = true;
-                             }
-                             if (accountData.feeDiscount === undefined) {
-                                 accountData.feeDiscount = 0.28;
-                                 needsSave = true;
-                             }
-                             if (accountData.marketType === undefined) {
-                                 accountData.marketType = 'TW';
-                                 needsSave = true;
-                             }
+                            }
+                            if (accountData.feeDiscount === undefined) {
+                                accountData.feeDiscount = 0.28;
+                                needsSave = true;
+                            }
+                            if (accountData.marketType === undefined) {
+                                accountData.marketType = 'TW';
+                                needsSave = true;
+                            }
                         }
 
-                        const transactions = appData.accounts[accountName].transactions; 
-                        const accountFeeDiscount = appData.accounts[accountName].feeDiscount; 
+                        const transactions = appData.accounts[accountName].transactions;
+                        const accountFeeDiscount = appData.accounts[accountName].feeDiscount;
                         const accountMarketType = appData.accounts[accountName].marketType || 'TW';
 
                         transactions.forEach(tx => {
                             if (!tx.name) tx.name = stockNameMap[tx.symbol] || '';
-                            if (tx.reviewed === undefined) tx.reviewed = false; 
+                            if (tx.reviewed === undefined) tx.reviewed = false;
                             if (tx.price === undefined) { tx.price = 0; needsSave = true; }
-                            
+
                             const amount = tx.price * tx.shares;
 
                             if (tx.fee === undefined || tx.feeDiscount !== undefined) {
                                 let fee = 0;
                                 if (accountMarketType === 'TW') {
-                                    fee = amount * FEE_RATE * accountFeeDiscount; 
+                                    fee = amount * FEE_RATE * accountFeeDiscount;
                                     if (tx.type === 'SELL') {
                                         fee += (amount * TAX_RATE);
                                     }
@@ -886,32 +1512,32 @@
                                     fee = amount * accountFeeDiscount;
                                 }
                                 tx.fee = fee;
-                                
+
                                 if (tx.type === 'BUY') {
-                                    tx.totalTxCost = amount + tx.fee; 
+                                    tx.totalTxCost = amount + tx.fee;
                                 }
                                 needsSave = true;
                             }
-                            
+
                             if (tx.feeDiscount !== undefined) {
                                 delete tx.feeDiscount;
                                 needsSave = true;
                             }
                         });
                     }
-                    
+
                     // *** Firebase 修改 ***: 如果資料遷移有變動，存回 Firebase
                     if (needsSave) {
                         saveDataToFirebase();
                         console.log("資料結構已更新或遷移完成。");
                     }
-                    
+
                     // --- 清理過期的待刪除交易 ---
                     cleanupExpiredTransactions(); // (此函式內部會呼叫 saveDataToFirebase)
-                    
+
                     // --- 恢復摺疊狀態 (*** 最終修正 ***) ---
                     const isCollapsed = localStorage.getItem('isFormCollapsed_SharesOnly') === 'true';
-                    
+
                     // 關鍵: 
                     // 我們在 JS 中計算一次正確的高度(即使是 0px 也沒關係)，並存為 CSS 變數
                     // 這樣 CSS 就可以在任何時候使用它
@@ -928,14 +1554,20 @@
                         collapsibleContent.classList.add('is-open');
                         collapseIcon.style.transform = 'rotate(0deg)';
                     }
-                    
+
+                    // --- 確保 journal 欄位存在 ---
+                    if (!appData.journal) {
+                        appData.journal = {};
+                    }
+
                     // --- 更新介面元件 ---
-                    updateAccountFilterOptions(); 
-                    updateAccountFeeDiscountDisplay(); 
-                    updateAccountMarketTypeDisplay(); 
-                    updateStockFilterOptions(); 
+                    updateAccountFilterOptions();
+                    updateAccountFeeDiscountDisplay();
+                    updateAccountMarketTypeDisplay();
+                    updateStockFilterOptions();
                     render(); // 重新渲染主要內容區域
-                    
+                    renderJournalCalendar(); // 渲染日誌日曆
+
                 }, (error) => {
                     console.error("Firebase 資料讀取失敗:", error);
                     showModal(messageModal, '連線錯誤', '無法從 Firebase 讀取資料。');
@@ -953,22 +1585,22 @@
                     console.warn("尚未登入或 Firebase 未初始化，無法儲存資料。");
                     return;
                 }
-                
-                try {
-					// *** 修改開始 ***: 建立乾淨的副本，剔除合併帳戶，防止汙染雲端資料
-					const dataToSave = JSON.parse(JSON.stringify(appData));
-					
-					// 如果當前選中的是合併帳戶，存檔時將 currentAccount 指回一個真實帳戶
-					if (dataToSave.currentAccount === MERGED_ACCOUNT_NAME) {
-						 dataToSave.currentAccount = Object.keys(dataToSave.accounts).find(k => k !== MERGED_ACCOUNT_NAME) || '預設帳戶';
-					}
 
-					// 移除虛擬的合併帳戶資料
-					if (dataToSave.accounts[MERGED_ACCOUNT_NAME]) {
-						delete dataToSave.accounts[MERGED_ACCOUNT_NAME];
-					}
-					// *** 修改結束 ***
-					
+                try {
+                    // *** 修改開始 ***: 建立乾淨的副本，剔除合併帳戶，防止汙染雲端資料
+                    const dataToSave = JSON.parse(JSON.stringify(appData));
+
+                    // 如果當前選中的是合併帳戶，存檔時將 currentAccount 指回一個真實帳戶
+                    if (dataToSave.currentAccount === MERGED_ACCOUNT_NAME) {
+                        dataToSave.currentAccount = Object.keys(dataToSave.accounts).find(k => k !== MERGED_ACCOUNT_NAME) || '預設帳戶';
+                    }
+
+                    // 移除虛擬的合併帳戶資料
+                    if (dataToSave.accounts[MERGED_ACCOUNT_NAME]) {
+                        delete dataToSave.accounts[MERGED_ACCOUNT_NAME];
+                    }
+                    // *** 修改結束 ***
+
                     // 使用 dataToSave 而不是 appData 進行上傳
                     db.ref('users/' + currentUid + '/appData').set(appData)
                         .catch((error) => {
@@ -981,7 +1613,7 @@
                     showModal(messageModal, '儲存失敗', '無法將資料同步至雲端。');
                 }
             }
-            
+
             /**
              * 將新增交易表單中的日期欄位預設為今天。
              */
@@ -994,12 +1626,12 @@
              * 清理標記為 "10天後刪除" 且已過期的交易紀錄。
              */
             function cleanupExpiredTransactions() {
-                let changed = false; 
-                const now = Date.now(); 
+                let changed = false;
+                const now = Date.now();
                 for (const accountName in appData.accounts) {
-                    const account = appData.accounts[accountName]; 
-                    const transactions = account.transactions; 
-                    if (!Array.isArray(transactions)) continue; 
+                    const account = appData.accounts[accountName];
+                    const transactions = account.transactions;
+                    if (!Array.isArray(transactions)) continue;
 
                     const symbolsWithExpiredTimestamp = [...new Set(
                         transactions
@@ -1008,102 +1640,102 @@
                     )];
 
                     symbolsWithExpiredTimestamp.forEach(symbol => {
-                        const holdings = getCurrentHoldings(symbol, transactions); 
+                        const holdings = getCurrentHoldings(symbol, transactions);
                         const currentShares = holdings.reduce((sum, tx) => sum + tx.shares, 0);
 
                         if (currentShares === 0) {
-                            account.transactions = transactions.filter(tx => tx.symbol !== symbol); 
-                        } 
+                            account.transactions = transactions.filter(tx => tx.symbol !== symbol);
+                        }
                         else {
-                            account.transactions.forEach(tx => { 
+                            account.transactions.forEach(tx => {
                                 if (tx.symbol === symbol) {
                                     delete tx.deletionTimestamp;
                                 }
                             });
                         }
-                        changed = true; 
+                        changed = true;
                     });
                 }
                 // *** Firebase 修改 ***: 如果資料有變動，則存回 Firebase
-                if (changed) saveDataToFirebase(); 
+                if (changed) saveDataToFirebase();
             }
-            
+
             // --- 後續所有函式 (updateAccountFilterOptions, render, calculateSummary, handleAddTransaction 等) 保持不變 ---
             // --- 唯一的修改是：在這些函式中，所有對 saveDataToLocalStorage() 的呼叫，都已替換為 saveDataToFirebase() ---
-            
+
             function updateAccountFilterOptions() {
                 if (!appData.accounts) {
-                    appData.accounts = { '預設帳戶': { transactions: [], feeDiscount: 0.28, marketType: 'TW' } }; 
+                    appData.accounts = { '預設帳戶': { transactions: [], feeDiscount: 0.28, marketType: 'TW' } };
                     appData.currentAccount = '預設帳戶';
                 }
-				
-                const accountNames = Object.keys(appData.accounts); 
-				// *** 修改開始 ***: 過濾掉合併帳戶
-				const displayNames = accountNames.filter(name => name !== MERGED_ACCOUNT_NAME);
-				// *** 修改結束 ***
-                accountFilter.innerHTML = ''; 
-				
-				// *** 修改 ***: 使用 displayNames 迴圈
+
+                const accountNames = Object.keys(appData.accounts);
+                // *** 修改開始 ***: 過濾掉合併帳戶
+                const displayNames = accountNames.filter(name => name !== MERGED_ACCOUNT_NAME);
+                // *** 修改結束 ***
+                accountFilter.innerHTML = '';
+
+                // *** 修改 ***: 使用 displayNames 迴圈
                 displayNames.forEach(name => {
                     const option = document.createElement('option');
                     option.value = name;
                     option.textContent = name;
                     accountFilter.appendChild(option);
                 });
-				
-				// *** 新增 ***: 如果當前是合併模式，手動加入該選項並啟用 CSS
-				if (appData.currentAccount === MERGED_ACCOUNT_NAME) {
-					const option = document.createElement('option');
-					option.value = MERGED_ACCOUNT_NAME;
-					option.textContent = `🔗 ${MERGED_ACCOUNT_NAME}`;
-					accountFilter.appendChild(option);
-					document.body.classList.add('merge-mode'); 
-				} else {
-					document.body.classList.remove('merge-mode');
-				}
-				
+
+                // *** 新增 ***: 如果當前是合併模式，手動加入該選項並啟用 CSS
+                if (appData.currentAccount === MERGED_ACCOUNT_NAME) {
+                    const option = document.createElement('option');
+                    option.value = MERGED_ACCOUNT_NAME;
+                    option.textContent = `🔗 ${MERGED_ACCOUNT_NAME}`;
+                    accountFilter.appendChild(option);
+                    document.body.classList.add('merge-mode');
+                } else {
+                    document.body.classList.remove('merge-mode');
+                }
+
                 accountFilter.value = appData.currentAccount;
                 deleteAccountBtn.classList.toggle('hidden', accountNames.length <= 1);
-                updateAccountFeeDiscountDisplay(); 
+                updateAccountFeeDiscountDisplay();
                 updateAccountMarketTypeDisplay();
             }
 
-             function updateAccountFeeDiscountDisplay() {
-                 if (appData.accounts && appData.accounts[appData.currentAccount]) {
-                     accountFeeDiscountInput.value = appData.accounts[appData.currentAccount].feeDiscount;
-                 } else {
-                      accountFeeDiscountInput.value = 0.28; 
-                 }
+            function updateAccountFeeDiscountDisplay() {
+                if (appData.accounts && appData.accounts[appData.currentAccount]) {
+                    accountFeeDiscountInput.value = appData.accounts[appData.currentAccount].feeDiscount;
+                } else {
+                    accountFeeDiscountInput.value = 0.28;
+                }
             }
-            
+
             function updateAccountMarketTypeDisplay() {
-                 if (appData.accounts && appData.accounts[appData.currentAccount]) {
-                     accountMarketTypeInput.value = appData.accounts[appData.currentAccount].marketType || 'TW';
-                 } else {
-                      accountMarketTypeInput.value = 'TW';
-                 }
+                if (appData.accounts && appData.accounts[appData.currentAccount]) {
+                    accountMarketTypeInput.value = appData.accounts[appData.currentAccount].marketType || 'TW';
+                } else {
+                    accountMarketTypeInput.value = 'TW';
+                }
             }
 
             function updateStockFilterOptions() {
                 const currentAccountData = appData.accounts[appData.currentAccount];
-                const currentTransactions = currentAccountData ? currentAccountData.transactions : []; 
-                
-                const selectedValue = stockFilter.value; 
-                const searchTerm = stockSearch.value.trim().toUpperCase(); 
-                
-                if (!Array.isArray(currentTransactions)) return; 
+                const currentTransactions = currentAccountData ? currentAccountData.transactions : [];
+
+                const selectedValue = stockFilter.value;
+                const searchTerm = stockSearch.value.trim().toUpperCase();
+
+                if (!Array.isArray(currentTransactions)) return;
 
                 let symbols = [...new Set(currentTransactions.map(tx => tx.symbol))];
-                
+
                 if (searchTerm) {
                     symbols = symbols.filter(symbol => symbol.toUpperCase().includes(searchTerm));
                 }
 
-                symbols.sort(); 
-                
+                symbols.sort();
+
                 const isCurrentSelectionValid = symbols.includes(selectedValue) || selectedValue === '__ALL__';
 
-                stockFilter.innerHTML = ''; 
+                stockFilter.innerHTML = '';
                 const allOption = document.createElement('option');
                 allOption.value = '__ALL__';
                 allOption.textContent = '全部庫存';
@@ -1118,103 +1750,103 @@
                     });
                 }
                 if (isCurrentSelectionValid) {
-                     stockFilter.value = selectedValue;
+                    stockFilter.value = selectedValue;
                 } else {
-                     stockFilter.value = '__ALL__';
+                    stockFilter.value = '__ALL__';
                 }
             }
-            
+
             function showModal(modalElement, title, message) {
-                 if (modalElement === messageModal) {
-                     messageModalTitle.textContent = title;
-                     messageModalMessage.textContent = message;
-                 }
-                 modalElement.classList.remove('opacity-0', 'pointer-events-none');
-                 modalElement.querySelector('.modal-content').classList.remove('scale-95');
+                if (modalElement === messageModal) {
+                    messageModalTitle.textContent = title;
+                    messageModalMessage.textContent = message;
+                }
+                modalElement.classList.remove('opacity-0', 'pointer-events-none');
+                modalElement.querySelector('.modal-content').classList.remove('scale-95');
             }
-            
+
             function hideModal(modalElement) {
                 modalElement.classList.add('opacity-0', 'pointer-events-none');
                 modalElement.querySelector('.modal-content').classList.add('scale-95');
             }
-            
+
             messageModalClose.addEventListener('click', () => hideModal(messageModal));
             addAccountBtn.addEventListener('click', () => {
-                 newAccountFeeDiscountInput.value = 0.28; 
-                 newAccountMarketTypeInput.value = 'TW'; 
-                 showModal(addAccountModal);
+                newAccountFeeDiscountInput.value = 0.28;
+                newAccountMarketTypeInput.value = 'TW';
+                showModal(addAccountModal);
             });
             addAccountCancelBtn.addEventListener('click', () => hideModal(addAccountModal));
-            
+
             editAccountBtn.addEventListener('click', () => {
                 editAccountNameInput.value = appData.currentAccount;
                 editAccountFeeDiscountInput.value = appData.accounts[appData.currentAccount]?.feeDiscount || 0.28;
-                editAccountMarketTypeInput.value = appData.accounts[appData.currentAccount]?.marketType || 'TW'; 
+                editAccountMarketTypeInput.value = appData.accounts[appData.currentAccount]?.marketType || 'TW';
                 showModal(editAccountModal);
             });
             editAccountCancelBtn.addEventListener('click', () => hideModal(editAccountModal));
-            
+
             deleteAccountBtn.addEventListener('click', () => {
                 const accountToDelete = appData.currentAccount;
                 deleteAccountMessage.textContent = `您確定要刪除「${accountToDelete}」帳戶嗎？此帳戶內的所有交易紀錄將被永久移除，此操作無法復原。`;
                 showModal(deleteAccountModal);
             });
             deleteAccountCancelBtn.addEventListener('click', () => hideModal(deleteAccountModal));
-            
+
             function getCurrentHoldings(symbol, transactions) {
-                if (!Array.isArray(transactions)) return []; 
+                if (!Array.isArray(transactions)) return [];
                 const activeTransactions = transactions.filter(tx => !tx.deletionTimestamp);
                 const symbolTxs = activeTransactions.filter(tx => tx.symbol === symbol);
                 const buyTxs = symbolTxs.filter(tx => tx.type === 'BUY').sort((a, b) => new Date(a.date) - new Date(b.date));
                 const sellTxs = symbolTxs.filter(tx => tx.type === 'SELL');
                 let sharesSold = sellTxs.reduce((sum, tx) => sum + tx.shares, 0);
-                
-                const holdings = []; 
+
+                const holdings = [];
                 for (const buyTx of buyTxs) {
                     const costBasis = buyTx.totalTxCost !== undefined ? buyTx.totalTxCost : (buyTx.price * buyTx.shares);
-                    const costPerShare = buyTx.shares !== 0 ? costBasis / buyTx.shares : 0; 
+                    const costPerShare = buyTx.shares !== 0 ? costBasis / buyTx.shares : 0;
 
                     if (sharesSold <= 0) {
-                        const { feeDiscount, ...restOfBuyTx } = buyTx; 
-                        holdings.push(restOfBuyTx); 
-                        continue; 
+                        const { feeDiscount, ...restOfBuyTx } = buyTx;
+                        holdings.push(restOfBuyTx);
+                        continue;
                     }
 
                     if (buyTx.shares > sharesSold) {
                         const remainingShares = buyTx.shares - sharesSold;
-                        const { feeDiscount, ...restOfBuyTx } = buyTx; 
+                        const { feeDiscount, ...restOfBuyTx } = buyTx;
                         holdings.push({
-                            ...restOfBuyTx, 
-                            shares: remainingShares, 
-                            totalTxCost: remainingShares * costPerShare 
+                            ...restOfBuyTx,
+                            shares: remainingShares,
+                            totalTxCost: remainingShares * costPerShare
                         });
-                        sharesSold = 0; 
-                    } 
+                        sharesSold = 0;
+                    }
                     else {
-                        sharesSold -= buyTx.shares; 
+                        sharesSold -= buyTx.shares;
                     }
                 }
-                return holdings; 
+                return holdings;
             }
 
             function render() {
                 const currentAccountData = appData.accounts[appData.currentAccount];
-                const currentTransactions = currentAccountData ? currentAccountData.transactions : []; 
+                const currentTransactions = currentAccountData ? currentAccountData.transactions : [];
 
-                if (!Array.isArray(currentTransactions)) return; 
-                
-                const selectedValue = stockFilter.value; 
-                const tableHead = transactionList.parentElement.querySelector('thead'); 
-                transactionList.innerHTML = ''; 
+                if (!Array.isArray(currentTransactions)) return;
+
+                const selectedValue = stockFilter.value;
+                const tableHead = transactionList.parentElement.querySelector('thead');
+                transactionList.innerHTML = '';
 
                 if (selectedValue === '__ALL__') {
-                    paginationControls.classList.add('hidden'); 
-                    viewTitle.textContent = '投資組合總覽'; 
-                    historyTitle.textContent = '庫存明細'; 
-                    avgCostBox.classList.remove('hidden'); 
-                    totalCostBox.classList.remove('hidden'); 
-                    calculatePortfolioSummary(currentTransactions); 
-                    
+                    paginationControls.classList.add('hidden');
+                    viewTitle.textContent = '投資組合總覽';
+                    historyTitle.textContent = '庫存明細';
+                    avgCostBox.classList.remove('hidden');
+                    totalCostBox.classList.remove('hidden');
+                    calculatePortfolioSummary(currentTransactions);
+
                     tableHead.innerHTML = `
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">更新狀態</th>
@@ -1230,12 +1862,12 @@
                             <th scope="col" class="relative px-6 py-3"><span class="sr-only">操作</span></th>
                         </tr>
                     `;
-                    
+
                     const symbols = [...new Set(currentTransactions.map(tx => tx.symbol))];
                     let portfolioDetails = symbols.map(symbol => {
-                        const holdings = getCurrentHoldings(symbol, currentTransactions); 
-                        const totalShares = holdings.reduce((sum, tx) => sum + tx.shares, 0); 
-                        if (totalShares <= 0) return null; 
+                        const holdings = getCurrentHoldings(symbol, currentTransactions);
+                        const totalShares = holdings.reduce((sum, tx) => sum + tx.shares, 0);
+                        if (totalShares <= 0) return null;
 
                         const totalCost = holdings.reduce((sum, tx) => sum + (tx.totalTxCost || 0), 0);
                         const averageCost = totalShares > 0 ? totalCost / totalShares : 0;
@@ -1245,18 +1877,18 @@
                         const symbolTransactions = currentTransactions.filter(tx => tx.symbol === symbol && !tx.deletionTimestamp);
                         const lastUpdateDate = symbolTransactions.reduce((max, tx) => (tx.date > max ? tx.date : max), '0000-00-00');
                         const name = (symbolTransactions.find(tx => tx.name) || {}).name || '';
-                        
+
                         const isFullyReviewed = symbolTransactions.length > 0 && symbolTransactions.every(tx => tx.reviewed === true);
 
                         return { symbol, name, totalShares, baseTotalCost, averageBaseCost, averageCost, totalCost, lastUpdateDate, isFullyReviewed };
-                    }).filter(Boolean); 
+                    }).filter(Boolean);
 
                     portfolioDetails.sort((a, b) => new Date(b.lastUpdateDate) - new Date(a.lastUpdateDate));
 
                     if (portfolioDetails.length > 0) {
                         portfolioDetails.forEach(detail => {
-                            const row = document.createElement('tr'); 
-                            row.className = 'hover:bg-stone-700/50'; 
+                            const row = document.createElement('tr');
+                            row.className = 'hover:bg-stone-700/50';
 
                             const statusText = detail.isFullyReviewed ? '是' : '否';
                             const statusColor = detail.isFullyReviewed ? 'bg-emerald-800 text-emerald-100 hover:bg-emerald-700' : 'bg-stone-600 text-stone-200 hover:bg-stone-500';
@@ -1269,12 +1901,12 @@
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">${statusButtonHTML}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-stone-100">${detail.symbol}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-400">${detail.name}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.totalShares.toLocaleString('en-US', {maximumFractionDigits: 3})}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.totalShares.toLocaleString('en-US', { maximumFractionDigits: 3 })}</td>
                                 
-								<td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.totalCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageBaseCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.baseTotalCost.toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
+								<td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageCost.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.totalCost.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.averageBaseCost.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${detail.baseTotalCost.toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
                                 
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-400">${detail.lastUpdateDate}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -1282,20 +1914,20 @@
                                 </td>
                                 
                             `;
-                            transactionList.appendChild(row); 
+                            transactionList.appendChild(row);
                         });
                     }
                     noDataMsg.textContent = '尚無任何庫存';
                     noDataMsg.classList.toggle('hidden', portfolioDetails.length > 0);
-                
+
                 } else {
                     const stockName = (currentTransactions.find(tx => tx.symbol === selectedValue) || {}).name || '';
-                    viewTitle.textContent = `個別檢視: ${selectedValue}`; 
-                    historyTitle.textContent = `交易歷史紀錄: ${selectedValue} ${stockName}`; 
-                    avgCostBox.classList.remove('hidden'); 
-                    totalCostBox.classList.remove('hidden'); 
-                    calculateSummary(selectedValue, currentTransactions); 
-                    
+                    viewTitle.textContent = `個別檢視: ${selectedValue}`;
+                    historyTitle.textContent = `交易歷史紀錄: ${selectedValue} ${stockName}`;
+                    avgCostBox.classList.remove('hidden');
+                    totalCostBox.classList.remove('hidden');
+                    calculateSummary(selectedValue, currentTransactions);
+
                     tableHead.innerHTML = `
                         <tr>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-stone-400 uppercase tracking-wider">日期</th>
@@ -1308,36 +1940,36 @@
                     `;
                     const displayTransactions = currentTransactions.filter(tx => tx.symbol === selectedValue);
                     const sortedTransactions = [...displayTransactions].sort((a, b) => new Date(b.date) - new Date(a.date) || b.id - a.id);
-                    
-                    const itemsPerPage = 10; 
-                    const totalPages = Math.ceil(sortedTransactions.length / itemsPerPage) || 1; 
-                    if (currentPage > totalPages) currentPage = totalPages; 
+
+                    const itemsPerPage = 10;
+                    const totalPages = Math.ceil(sortedTransactions.length / itemsPerPage) || 1;
+                    if (currentPage > totalPages) currentPage = totalPages;
                     const paginatedTransactions = sortedTransactions.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
                     paginationControls.classList.toggle('hidden', sortedTransactions.length <= itemsPerPage);
                     pageInfo.textContent = `第 ${currentPage} / ${totalPages} 頁`;
                     prevPageBtn.disabled = currentPage === 1;
                     nextPageBtn.disabled = currentPage === totalPages;
-                    
-                    paginatedTransactions.forEach(tx => {
-                        const row = document.createElement('tr'); 
-                        row.className = 'hover:bg-stone-700/50 transition-colors duration-200'; 
 
-                        const typeCell = tx.type === 'BUY' 
+                    paginatedTransactions.forEach(tx => {
+                        const row = document.createElement('tr');
+                        row.className = 'hover:bg-stone-700/50 transition-colors duration-200';
+
+                        const typeCell = tx.type === 'BUY'
                             ? `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-sky-900 text-sky-200">買入</span>`
                             : `<span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-rose-900 text-rose-200">賣出</span>`;
 
                         row.innerHTML = `
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${tx.date}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm">${typeCell}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${tx.shares.toLocaleString('en-US', {maximumFractionDigits: 8})}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${(tx.price || 0).toLocaleString('en-US', {maximumFractionDigits: 4})}</td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${(tx.fee || 0).toLocaleString('en-US', {maximumFractionDigits: 2})}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${tx.shares.toLocaleString('en-US', { maximumFractionDigits: 8 })}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${(tx.price || 0).toLocaleString('en-US', { maximumFractionDigits: 4 })}</td>
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-stone-300">${(tx.fee || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-4">
                                 <button class="text-stone-400 hover:text-stone-200" data-id="${tx.id}" data-action="edit">編輯</button>
                                 <button class="text-rose-400 hover:text-rose-500" data-id="${tx.id}" data-action="delete">刪除</button>
                             </td>
                         `;
-                        transactionList.appendChild(row); 
+                        transactionList.appendChild(row);
                     });
                     noDataMsg.textContent = '尚無交易紀錄';
                     noDataMsg.classList.toggle('hidden', displayTransactions.length > 0);
@@ -1359,132 +1991,132 @@
                 const totalShares = holdings.reduce((sum, tx) => sum + tx.shares, 0);
                 const totalCost = holdings.reduce((sum, tx) => sum + (tx.totalTxCost || 0), 0);
                 const averageCost = totalShares > 0 ? totalCost / totalShares : 0;
-                
-                totalSharesEl.textContent = totalShares.toLocaleString('en-US', {maximumFractionDigits: 8});
-                avgCostEl.textContent = averageCost.toLocaleString('en-US', {maximumFractionDigits: 4});
-                totalCostEl.textContent = totalCost.toLocaleString('en-US', {maximumFractionDigits: 2});
+
+                totalSharesEl.textContent = totalShares.toLocaleString('en-US', { maximumFractionDigits: 8 });
+                avgCostEl.textContent = averageCost.toLocaleString('en-US', { maximumFractionDigits: 4 });
+                totalCostEl.textContent = totalCost.toLocaleString('en-US', { maximumFractionDigits: 2 });
             }
-            
+
             function calculatePortfolioSummary(transactions) {
                 sharesTitle.textContent = '全部檔數';
-                avgCostTitle.textContent = '總成本(不含費用)'; 
+                avgCostTitle.textContent = '總成本(不含費用)';
                 totalCostTitle.textContent = '總成本(含費用)';
 
                 if (!Array.isArray(transactions)) {
                     totalSharesEl.textContent = '0';
-                    avgCostEl.textContent = '0'; 
+                    avgCostEl.textContent = '0';
                     totalCostEl.textContent = '0';
                     return;
                 }
                 const symbols = [...new Set(transactions.map(tx => tx.symbol))];
-                let portfolioStockCount = 0; 
-                let portfolioTotalCost = 0; 
-                let portfolioBaseTotalCost = 0; 
-                
+                let portfolioStockCount = 0;
+                let portfolioTotalCost = 0;
+                let portfolioBaseTotalCost = 0;
+
                 symbols.forEach(symbol => {
-                    const holdings = getCurrentHoldings(symbol, transactions); 
-                    const symbolTotalShares = holdings.reduce((sum, tx) => sum + tx.shares, 0); 
+                    const holdings = getCurrentHoldings(symbol, transactions);
+                    const symbolTotalShares = holdings.reduce((sum, tx) => sum + tx.shares, 0);
                     if (symbolTotalShares > 0) {
-                        portfolioStockCount++; 
+                        portfolioStockCount++;
                         const symbolTotalCost = holdings.reduce((sum, tx) => sum + (tx.totalTxCost || 0), 0);
                         portfolioTotalCost += symbolTotalCost;
                         const symbolBaseTotalCost = holdings.reduce((sum, tx) => sum + (tx.shares * (tx.price || 0)), 0);
                         portfolioBaseTotalCost += symbolBaseTotalCost;
                     }
                 });
-                
+
                 totalSharesEl.textContent = new Intl.NumberFormat().format(portfolioStockCount);
-                avgCostEl.textContent = portfolioBaseTotalCost.toLocaleString('en-US', {maximumFractionDigits: 2}); 
-                totalCostEl.textContent = portfolioTotalCost.toLocaleString('en-US', {maximumFractionDigits: 2});
+                avgCostEl.textContent = portfolioBaseTotalCost.toLocaleString('en-US', { maximumFractionDigits: 2 });
+                totalCostEl.textContent = portfolioTotalCost.toLocaleString('en-US', { maximumFractionDigits: 2 });
             }
 
             function handleAddTransaction(e, transactionType) {
-                e.preventDefault(); 
+                e.preventDefault();
                 const symbol = document.getElementById('tx-symbol').value.trim().toUpperCase();
-                const name = stockNameMap[symbol] || ''; 
+                const name = stockNameMap[symbol] || '';
                 const date = document.getElementById('tx-date').value;
                 const shares = parseFloat(document.getElementById('tx-shares').value);
-                const price = parseFloat(document.getElementById('tx-price').value); 
+                const price = parseFloat(document.getElementById('tx-price').value);
                 const currentAccount = appData.accounts[appData.currentAccount];
                 // *** 修改 ***: 使用 ?? 取代 ||，這樣 0 就不會被當成無效值
-				const feeDiscount = currentAccount?.feeDiscount ?? 0.28; 
+                const feeDiscount = currentAccount?.feeDiscount ?? 0.28;
                 const marketType = currentAccount?.marketType || 'TW';
-                
+
                 if (!symbol) { showModal(messageModal, '輸入錯誤', '請輸入股票代號。'); return; }
                 if (isNaN(shares) || shares <= 0) { showModal(messageModal, '輸入錯誤', '請檢查股數是否為有效的正數。'); return; }
                 if (isNaN(price) || price < 0) { showModal(messageModal, '輸入錯誤', '請檢查價格(均價)是否為有效的數字。'); return; }
 
-                const currentAccountData = appData.accounts[appData.currentAccount]; 
-                const currentTransactions = currentAccountData.transactions; 
-                
+                const currentAccountData = appData.accounts[appData.currentAccount];
+                const currentTransactions = currentAccountData.transactions;
+
                 if (transactionType === 'SELL') {
-                    const holdings = getCurrentHoldings(symbol, currentTransactions); 
-                    const currentShares = holdings.reduce((sum, tx) => sum + tx.shares, 0); 
+                    const holdings = getCurrentHoldings(symbol, currentTransactions);
+                    const currentShares = holdings.reduce((sum, tx) => sum + tx.shares, 0);
                     if (shares > currentShares) {
-                        showModal(messageModal, '賣出失敗', `您只有 ${currentShares.toLocaleString('en-US', {maximumFractionDigits: 8})} 股，無法賣出 ${shares} 股。`);
+                        showModal(messageModal, '賣出失敗', `您只有 ${currentShares.toLocaleString('en-US', { maximumFractionDigits: 8 })} 股，無法賣出 ${shares} 股。`);
                         return;
                     }
                 }
 
-                const amount = price * shares; 
-                let fee = 0; 
-                let totalTxCost = 0; 
+                const amount = price * shares;
+                let fee = 0;
+                let totalTxCost = 0;
 
                 if (marketType === 'TW') {
-                    fee = amount * FEE_RATE * feeDiscount; 
+                    fee = amount * FEE_RATE * feeDiscount;
                     if (transactionType === 'BUY') {
-                        totalTxCost = amount + fee; 
+                        totalTxCost = amount + fee;
                     } else { // 'SELL'
-                        fee += (amount * TAX_RATE); 
+                        fee += (amount * TAX_RATE);
                     }
                 } else { // 'US'
-                    fee = amount * feeDiscount; 
+                    fee = amount * feeDiscount;
                     if (transactionType === 'BUY') {
                         totalTxCost = amount + fee;
                     } else { // 'SELL'
                     }
                 }
-                
-                const newTransaction = { 
-                    id: Date.now(), 
-                    type: transactionType, 
-                    symbol, 
-                    name, 
-                    date, 
-                    shares, 
-                    price, 
-                    fee: fee, 
-                    reviewed: false 
+
+                const newTransaction = {
+                    id: Date.now(),
+                    type: transactionType,
+                    symbol,
+                    name,
+                    date,
+                    shares,
+                    price,
+                    fee: fee,
+                    reviewed: false
                 };
 
                 if (transactionType === 'BUY') {
-                    newTransaction.totalTxCost = totalTxCost; 
+                    newTransaction.totalTxCost = totalTxCost;
                 }
 
-                currentTransactions.push(newTransaction); 
+                currentTransactions.push(newTransaction);
                 saveDataToFirebase(); // *** Firebase 修改 ***
-                
-                addTransactionForm.reset(); 
-                setDateToToday(); 
-                
+
+                addTransactionForm.reset();
+                setDateToToday();
+
                 if (transactionType === 'SELL') {
-                    const updatedHoldings = getCurrentHoldings(symbol, currentTransactions); 
-                    const remainingShares = updatedHoldings.reduce((sum, tx) => sum + tx.shares, 0); 
+                    const updatedHoldings = getCurrentHoldings(symbol, currentTransactions);
+                    const remainingShares = updatedHoldings.reduce((sum, tx) => sum + tx.shares, 0);
                     if (remainingShares === 0) {
                         symbolToClear = symbol;
                         clearHistoryMessage.textContent = `股票 ${symbol} 的庫存已為零，是否要清除其所有相關交易歷史紀錄？`;
                         showModal(clearHistoryModal);
                     } else {
                         updateStockFilterOptions();
-                        stockFilter.value = symbol; 
-                        currentPage = 1; 
+                        stockFilter.value = symbol;
+                        currentPage = 1;
                         render();
                     }
-                } 
+                }
                 else {
                     updateStockFilterOptions();
-                    stockFilter.value = symbol; 
-                    currentPage = 1; 
+                    stockFilter.value = symbol;
+                    currentPage = 1;
                     render();
                 }
             }
@@ -1494,21 +2126,21 @@
             addSellBtn.addEventListener('click', (e) => handleAddTransaction(e, 'SELL'));
 
             transactionList.addEventListener('click', (e) => {
-                const target = e.target.closest('button'); 
+                const target = e.target.closest('button');
                 if (!target || !target.dataset.action) return;
 
-                const action = target.dataset.action; 
-                const currentAccountData = appData.accounts[appData.currentAccount]; 
-                const currentTransactions = currentAccountData.transactions; 
+                const action = target.dataset.action;
+                const currentAccountData = appData.accounts[appData.currentAccount];
+                const currentTransactions = currentAccountData.transactions;
 
                 if (action === 'delete' || action === 'edit') {
-                    const id = parseInt(target.dataset.id, 10); 
+                    const id = parseInt(target.dataset.id, 10);
                     if (action === 'delete') {
-                        currentAccountData.transactions = currentTransactions.filter(tx => tx.id !== id); 
+                        currentAccountData.transactions = currentTransactions.filter(tx => tx.id !== id);
                         saveDataToFirebase(); // *** Firebase 修改 ***
-                        updateStockFilterOptions(); 
-                        render(); 
-                    } 
+                        updateStockFilterOptions();
+                        render();
+                    }
                     else if (action === 'edit') {
                         const tx = currentTransactions.find(t => t.id === id);
                         if (tx) {
@@ -1516,29 +2148,29 @@
                             document.getElementById('edit-symbol').value = tx.symbol;
                             document.getElementById('edit-date').value = tx.date;
                             document.getElementById('edit-shares').value = tx.shares;
-                            document.getElementById('edit-price').value = tx.price || 0; 
-                            editModalTitle.textContent = `編輯 ${tx.symbol} (${tx.type === 'BUY' ? '買入' : '賣出'})`; 
-                            document.getElementById('edit-symbol').dispatchEvent(new Event('input')); 
-                            showModal(editTransactionModal); 
+                            document.getElementById('edit-price').value = tx.price || 0;
+                            editModalTitle.textContent = `編輯 ${tx.symbol} (${tx.type === 'BUY' ? '買入' : '賣出'})`;
+                            document.getElementById('edit-symbol').dispatchEvent(new Event('input'));
+                            showModal(editTransactionModal);
                         }
                     }
-                } 
+                }
                 else if (action === 'toggle-status-all') {
-                    const symbol = target.dataset.symbol; 
-                    const transactionsForSymbol = currentTransactions.filter(tx => tx.symbol === symbol); 
+                    const symbol = target.dataset.symbol;
+                    const transactionsForSymbol = currentTransactions.filter(tx => tx.symbol === symbol);
                     if (transactionsForSymbol.length > 0) {
                         const isCurrentlyFullyReviewed = transactionsForSymbol.every(tx => tx.reviewed === true);
-                        const newStatus = !isCurrentlyFullyReviewed; 
-                        
+                        const newStatus = !isCurrentlyFullyReviewed;
+
                         transactionsForSymbol.forEach(tx => {
-                             const originalTx = currentTransactions.find(t => t.id === tx.id);
-                             if (originalTx) {
-                                 originalTx.reviewed = newStatus;
-                             }
+                            const originalTx = currentTransactions.find(t => t.id === tx.id);
+                            if (originalTx) {
+                                originalTx.reviewed = newStatus;
+                            }
                         });
-                        
+
                         saveDataToFirebase(); // *** Firebase 修改 ***
-                        render(); 
+                        render();
                     }
                 }
                 else if (action === 'delete-inventory') {
@@ -1550,100 +2182,100 @@
             });
 
             deleteInventoryCancelBtn.addEventListener('click', () => hideModal(deleteInventoryModal));
-            
+
             deleteInventoryConfirmBtn.addEventListener('click', () => {
                 if (inventorySymbolToDelete) {
                     const currentAccountData = appData.accounts[appData.currentAccount];
                     if (currentAccountData && currentAccountData.transactions) {
-                         currentAccountData.transactions = currentAccountData.transactions.filter(tx => tx.symbol !== inventorySymbolToDelete);
-                         saveDataToFirebase();
-                         render();
+                        currentAccountData.transactions = currentAccountData.transactions.filter(tx => tx.symbol !== inventorySymbolToDelete);
+                        saveDataToFirebase();
+                        render();
                     }
                 }
                 hideModal(deleteInventoryModal);
             });
 
             accountFilter.addEventListener('change', (e) => {
-                appData.currentAccount = e.target.value; 
-				
-				// *** 新增 ***: 切換帳戶時，如果存在殘留的合併帳戶資料，立即刪除
-				if (appData.accounts[MERGED_ACCOUNT_NAME]) {
-					delete appData.accounts[MERGED_ACCOUNT_NAME];
-				}
-				// *** 新增結束 ***
-				
+                appData.currentAccount = e.target.value;
+
+                // *** 新增 ***: 切換帳戶時，如果存在殘留的合併帳戶資料，立即刪除
+                if (appData.accounts[MERGED_ACCOUNT_NAME]) {
+                    delete appData.accounts[MERGED_ACCOUNT_NAME];
+                }
+                // *** 新增結束 ***
+
                 saveDataToFirebase(); // *** Firebase 修改 *** (儲存目前選擇)
-                stockSearch.value = ''; 
-                updateAccountFeeDiscountDisplay(); 
-                updateAccountMarketTypeDisplay(); 
-                updateStockFilterOptions(); 
-                currentPage = 1; 
-				updateAccountFilterOptions(); // *** 新增 ***: 確保介面狀態即時更新(移除CSS)
-                render(); 
+                stockSearch.value = '';
+                updateAccountFeeDiscountDisplay();
+                updateAccountMarketTypeDisplay();
+                updateStockFilterOptions();
+                currentPage = 1;
+                updateAccountFilterOptions(); // *** 新增 ***: 確保介面狀態即時更新(移除CSS)
+                render();
             });
 
             accountFeeDiscountInput.addEventListener('change', (e) => {
-                 const newDiscount = parseFloat(e.target.value); 
-				 
-                 if (!isNaN(newDiscount) && newDiscount >= 0 && appData.accounts[appData.currentAccount]) {
-                     appData.accounts[appData.currentAccount].feeDiscount = newDiscount;
-                     saveDataToFirebase(); // *** Firebase 修改 ***
-                     render(); 
-                 } else {
-                      showModal(messageModal, '錯誤', '請輸入有效的手續費折數/費率。');
-                      updateAccountFeeDiscountDisplay(); 
-                 }
+                const newDiscount = parseFloat(e.target.value);
+
+                if (!isNaN(newDiscount) && newDiscount >= 0 && appData.accounts[appData.currentAccount]) {
+                    appData.accounts[appData.currentAccount].feeDiscount = newDiscount;
+                    saveDataToFirebase(); // *** Firebase 修改 ***
+                    render();
+                } else {
+                    showModal(messageModal, '錯誤', '請輸入有效的手續費折數/費率。');
+                    updateAccountFeeDiscountDisplay();
+                }
             });
 
             accountMarketTypeInput.addEventListener('change', (e) => {
-                 const newMarketType = e.target.value;
-                 if (appData.accounts[appData.currentAccount]) {
-                     appData.accounts[appData.currentAccount].marketType = newMarketType;
-                     saveDataToFirebase(); // *** Firebase 修改 ***
-                     render(); 
-                 }
+                const newMarketType = e.target.value;
+                if (appData.accounts[appData.currentAccount]) {
+                    appData.accounts[appData.currentAccount].marketType = newMarketType;
+                    saveDataToFirebase(); // *** Firebase 修改 ***
+                    render();
+                }
             });
-            
+
             stockFilter.addEventListener('change', () => {
-                currentPage = 1; 
-                render(); 
+                currentPage = 1;
+                render();
             });
-            
+
             stockSearch.addEventListener('input', () => {
-                updateStockFilterOptions(); 
-                render(); 
+                updateStockFilterOptions();
+                render();
             });
 
             prevPageBtn.addEventListener('click', () => {
                 if (currentPage > 1) {
-                    currentPage--; 
-                    render(); 
+                    currentPage--;
+                    render();
                 }
             });
             nextPageBtn.addEventListener('click', () => {
-                 const currentAccountData = appData.accounts[appData.currentAccount];
-                 const currentTransactions = currentAccountData ? currentAccountData.transactions : [];
-                 const selectedStock = stockFilter.value;
-                 const itemsPerPage = 10;
-                 let totalItems = 0;
-                 if (selectedStock === '__ALL__') {
-                 } else {
-                     totalItems = currentTransactions.filter(tx => tx.symbol === selectedStock).length;
-                 }
-                 const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+                const currentAccountData = appData.accounts[appData.currentAccount];
+                const currentTransactions = currentAccountData ? currentAccountData.transactions : [];
+                const selectedStock = stockFilter.value;
+                const itemsPerPage = 10;
+                let totalItems = 0;
+                if (selectedStock === '__ALL__') {
+                } else {
+                    totalItems = currentTransactions.filter(tx => tx.symbol === selectedStock).length;
+                }
+                const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
-                if (currentPage < totalPages) { 
-                     currentPage++; 
-                     render(); 
-                 }
+                if (currentPage < totalPages) {
+                    currentPage++;
+                    render();
+                }
             });
-			
-			// --- *** 新增 ***: 合併帳戶功能邏輯 ---
+
+            // --- *** 新增 ***: 合併帳戶功能邏輯 ---
             mergeViewBtn.addEventListener('click', () => {
-                mergeAccountList.innerHTML = ''; 
+                mergeAccountList.innerHTML = '';
                 // 過濾掉合併帳戶本身
                 const accountNames = Object.keys(appData.accounts).filter(name => name !== MERGED_ACCOUNT_NAME);
-                
+
                 accountNames.forEach(name => {
                     const div = document.createElement('div');
                     div.className = 'flex items-center p-2 rounded hover:bg-stone-700 cursor-pointer';
@@ -1661,15 +2293,15 @@
             mergeAccountConfirmBtn.addEventListener('click', () => {
                 const checkboxes = mergeAccountList.querySelectorAll('input[type="checkbox"]:checked');
                 const selectedAccounts = Array.from(checkboxes).map(cb => cb.value);
-                
+
                 if (selectedAccounts.length === 0) {
                     showModal(messageModal, '提示', '請至少選擇一個帳戶進行合併。');
                     return;
                 }
 
                 let mergedTransactions = [];
-                let baseMarketType = 'TW'; 
-                
+                let baseMarketType = 'TW';
+
                 selectedAccounts.forEach((accName, index) => {
                     const acc = appData.accounts[accName];
                     if (acc && Array.isArray(acc.transactions)) {
@@ -1677,35 +2309,35 @@
                         const accTxs = acc.transactions.map(tx => ({ ...tx }));
                         mergedTransactions = mergedTransactions.concat(accTxs);
                         // 以第一個選中帳戶的市場類型作為基準
-                        if (index === 0) baseMarketType = acc.marketType || 'TW'; 
+                        if (index === 0) baseMarketType = acc.marketType || 'TW';
                     }
                 });
 
                 // 建立虛擬帳戶 (此資料只存在於記憶體 appData，saveDataToFirebase 會將其過濾掉)
                 appData.accounts[MERGED_ACCOUNT_NAME] = {
                     transactions: mergedTransactions,
-                    feeDiscount: 0, 
+                    feeDiscount: 0,
                     marketType: baseMarketType
                 };
 
                 appData.currentAccount = MERGED_ACCOUNT_NAME;
-                
+
                 hideModal(mergeAccountModal);
-                updateAccountFilterOptions(); 
+                updateAccountFilterOptions();
                 updateStockFilterOptions();
                 stockSearch.value = '';
                 currentPage = 1;
                 render();
-                
+
                 showModal(messageModal, '合併成功', `已合併 ${selectedAccounts.length} 個帳戶的資料。在此模式下無法新增或編輯交易。`);
             });
-            
+
             addAccountForm.addEventListener('submit', (e) => {
-                e.preventDefault(); 
+                e.preventDefault();
                 const newAccountNameInput = document.getElementById('new-account-name');
-                const newAccountName = newAccountNameInput.value.trim(); 
-                const newFeeDiscount = parseFloat(newAccountFeeDiscountInput.value); 
-                const newMarketType = newAccountMarketTypeInput.value; 
+                const newAccountName = newAccountNameInput.value.trim();
+                const newFeeDiscount = parseFloat(newAccountFeeDiscountInput.value);
+                const newMarketType = newAccountMarketTypeInput.value;
 
                 if (!newAccountName) {
                     showModal(messageModal, '錯誤', '帳戶名稱不能為空。');
@@ -1715,63 +2347,63 @@
                     showModal(messageModal, '錯誤', '該帳戶名稱已存在。');
                     return;
                 }
-                 if (isNaN(newFeeDiscount) || newFeeDiscount < 0) { 
+                if (isNaN(newFeeDiscount) || newFeeDiscount < 0) {
                     showModal(messageModal, '錯誤', '請輸入有效的手續費折數/費率。');
                     return;
                 }
 
-                appData.accounts[newAccountName] = { transactions: [], feeDiscount: newFeeDiscount, marketType: newMarketType }; 
-                appData.currentAccount = newAccountName; 
+                appData.accounts[newAccountName] = { transactions: [], feeDiscount: newFeeDiscount, marketType: newMarketType };
+                appData.currentAccount = newAccountName;
                 saveDataToFirebase(); // *** Firebase 修改 ***
 
-                newAccountNameInput.value = ''; 
-                newAccountFeeDiscountInput.value = 0.28; 
-                newAccountMarketTypeInput.value = 'TW'; 
-                hideModal(addAccountModal); 
-                updateAccountFilterOptions(); 
-                updateStockFilterOptions(); 
-                currentPage = 1; 
-                render(); 
+                newAccountNameInput.value = '';
+                newAccountFeeDiscountInput.value = 0.28;
+                newAccountMarketTypeInput.value = 'TW';
+                hideModal(addAccountModal);
+                updateAccountFilterOptions();
+                updateStockFilterOptions();
+                currentPage = 1;
+                render();
             });
-            
+
             editAccountForm.addEventListener('submit', (e) => {
-                e.preventDefault(); 
-                const oldAccountName = appData.currentAccount; 
-                const newAccountName = editAccountNameInput.value.trim(); 
-                const newFeeDiscount = parseFloat(editAccountFeeDiscountInput.value); 
-                const newMarketType = editAccountMarketTypeInput.value; 
+                e.preventDefault();
+                const oldAccountName = appData.currentAccount;
+                const newAccountName = editAccountNameInput.value.trim();
+                const newFeeDiscount = parseFloat(editAccountFeeDiscountInput.value);
+                const newMarketType = editAccountMarketTypeInput.value;
 
                 if (!newAccountName) {
                     showModal(messageModal, '錯誤', '帳戶名稱不能為空。');
                     return;
                 }
-                 if (isNaN(newFeeDiscount) || newFeeDiscount < 0) { 
+                if (isNaN(newFeeDiscount) || newFeeDiscount < 0) {
                     showModal(messageModal, '錯誤', '請輸入有效的手續費折數/費率。');
                     return;
                 }
                 if (newAccountName !== oldAccountName && appData.accounts[newAccountName]) {
-                     showModal(messageModal, '錯誤', '該帳戶名稱已存在。');
+                    showModal(messageModal, '錯誤', '該帳戶名稱已存在。');
                     return;
                 }
 
-                const accountDataToModify = appData.accounts[oldAccountName]; 
+                const accountDataToModify = appData.accounts[oldAccountName];
                 accountDataToModify.feeDiscount = newFeeDiscount;
                 accountDataToModify.marketType = newMarketType;
 
                 if (newAccountName !== oldAccountName) {
                     appData.accounts[newAccountName] = accountDataToModify;
                     delete appData.accounts[oldAccountName];
-                    appData.currentAccount = newAccountName; 
+                    appData.currentAccount = newAccountName;
                 }
-                
+
                 saveDataToFirebase(); // *** Firebase 修改 ***
-                updateAccountFilterOptions(); 
-                render(); 
-                hideModal(editAccountModal); 
+                updateAccountFilterOptions();
+                render();
+                hideModal(editAccountModal);
             });
 
             deleteAccountConfirmBtn.addEventListener('click', () => {
-                const accountToDelete = appData.currentAccount; 
+                const accountToDelete = appData.currentAccount;
                 if (Object.keys(appData.accounts).length <= 1) {
                     showModal(messageModal, '錯誤', '無法刪除最後一個帳戶。');
                     hideModal(deleteAccountModal);
@@ -1780,120 +2412,120 @@
                 delete appData.accounts[accountToDelete];
                 appData.currentAccount = Object.keys(appData.accounts)[0];
                 saveDataToFirebase(); // *** Firebase 修改 ***
-                hideModal(deleteAccountModal); 
-                updateAccountFilterOptions(); 
-                updateStockFilterOptions(); 
-                render(); 
-                showModal(messageModal, '成功', `帳戶「${accountToDelete}」已成功刪除。`); 
+                hideModal(deleteAccountModal);
+                updateAccountFilterOptions();
+                updateStockFilterOptions();
+                render();
+                showModal(messageModal, '成功', `帳戶「${accountToDelete}」已成功刪除。`);
             });
-            
+
             clearHistoryNowBtn.addEventListener('click', () => {
-                if (symbolToClear && appData.accounts[appData.currentAccount]) { 
-                    const account = appData.accounts[appData.currentAccount]; 
-                    account.transactions = account.transactions.filter(tx => tx.symbol !== symbolToClear); 
+                if (symbolToClear && appData.accounts[appData.currentAccount]) {
+                    const account = appData.accounts[appData.currentAccount];
+                    account.transactions = account.transactions.filter(tx => tx.symbol !== symbolToClear);
                     saveDataToFirebase(); // *** Firebase 修改 ***
-                    hideModal(clearHistoryModal); 
-                    updateStockFilterOptions(); 
-                    render(); 
-                    showModal(messageModal, '紀錄已清除', `股票 ${symbolToClear} 的所有交易紀錄已被移除。`); 
-                    symbolToClear = null; 
+                    hideModal(clearHistoryModal);
+                    updateStockFilterOptions();
+                    render();
+                    showModal(messageModal, '紀錄已清除', `股票 ${symbolToClear} 的所有交易紀錄已被移除。`);
+                    symbolToClear = null;
                 }
             });
 
             clearHistoryLaterBtn.addEventListener('click', () => {
-                if (symbolToClear && appData.accounts[appData.currentAccount]) { 
-                    const account = appData.accounts[appData.currentAccount]; 
-                    const tenDaysInMillis = 10 * 24 * 60 * 60 * 1000; 
-                    const deletionTimestamp = Date.now() + tenDaysInMillis; 
-                    const activeTransactionsForSymbol = account.transactions 
+                if (symbolToClear && appData.accounts[appData.currentAccount]) {
+                    const account = appData.accounts[appData.currentAccount];
+                    const tenDaysInMillis = 10 * 24 * 60 * 60 * 1000;
+                    const deletionTimestamp = Date.now() + tenDaysInMillis;
+                    const activeTransactionsForSymbol = account.transactions
                         .filter(tx => tx.symbol === symbolToClear && !tx.deletionTimestamp);
 
                     activeTransactionsForSymbol.forEach(tx => {
-                       const originalTx = account.transactions.find(t => t.id === tx.id); 
-                       if(originalTx) {
-                           originalTx.deletionTimestamp = deletionTimestamp;
-                       }
+                        const originalTx = account.transactions.find(t => t.id === tx.id);
+                        if (originalTx) {
+                            originalTx.deletionTimestamp = deletionTimestamp;
+                        }
                     });
                     saveDataToFirebase(); // *** Firebase 修改 ***
-                    hideModal(clearHistoryModal); 
-                    updateStockFilterOptions(); 
-                    stockFilter.value = symbolToClear; 
-                    render(); 
-                    showModal(messageModal, '已排程清除', `股票 ${symbolToClear} 的紀錄將在10天後自動清除。`); 
-                    symbolToClear = null; 
+                    hideModal(clearHistoryModal);
+                    updateStockFilterOptions();
+                    stockFilter.value = symbolToClear;
+                    render();
+                    showModal(messageModal, '已排程清除', `股票 ${symbolToClear} 的紀錄將在10天後自動清除。`);
+                    symbolToClear = null;
                 }
             });
 
             exportBtn.addEventListener('click', () => {
                 // 匯出功能不變，匯出的是目前載入到瀏覽器中的 appData
-                if (!appData.accounts || Object.keys(appData.accounts).length === 0) { 
-                    showModal(messageModal, '提示', '沒有可匯出的資料。'); 
-                    return; 
+                if (!appData.accounts || Object.keys(appData.accounts).length === 0) {
+                    showModal(messageModal, '提示', '沒有可匯出的資料。');
+                    return;
                 }
                 const dataStr = JSON.stringify(appData, null, 2);
                 const dataBlob = new Blob([dataStr], { type: 'application/json' });
                 const url = URL.createObjectURL(dataBlob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `stock_shares_tracker_data_${new Date().toISOString().slice(0,10)}.json`;
-                document.body.appendChild(a); 
-                a.click(); 
-                document.body.removeChild(a); 
-                URL.revokeObjectURL(url); 
-                showModal(messageModal, '匯出成功', '您的所有帳戶紀錄已成功匯出為 JSON 檔案。'); 
+                a.download = `stock_shares_tracker_data_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                showModal(messageModal, '匯出成功', '您的所有帳戶紀錄已成功匯出為 JSON 檔案。');
             });
 
             importBtn.addEventListener('click', () => importFile.click());
             importFile.addEventListener('change', (e) => {
-                const file = e.target.files[0]; 
-                if (!file) return; 
-                const reader = new FileReader(); 
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
                 reader.onload = (event) => {
                     try {
                         const importedData = JSON.parse(event.target.result);
                         if (importedData.accounts && importedData.currentAccount) {
                             appData = importedData; // 覆蓋目前的 appData
-                            currentPage = 1; 
-                            
+                            currentPage = 1;
+
                             // *** Firebase 修改 ***: 
                             // 將匯入的資料存到 Firebase
                             // onValue 監聽器會自動偵測到這個變更，並觸發 initializeApp/render
-                            saveDataToFirebase(); 
-                            
-                            showModal(messageModal, '匯入成功', '所有帳戶紀錄已成功匯入並同步至雲端。'); 
+                            saveDataToFirebase();
+
+                            showModal(messageModal, '匯入成功', '所有帳戶紀錄已成功匯入並同步至雲端。');
                         } else {
                             throw new Error('檔案格式不符');
                         }
                     } catch (error) {
-                         showModal(messageModal, '匯入失敗', `檔案格式不正確或已損毀。(${error.message})`);
+                        showModal(messageModal, '匯入失敗', `檔案格式不正確或已損毀。(${error.message})`);
                     }
                 };
                 reader.onerror = () => {
                     showModal(messageModal, '匯入失敗', '讀取檔案時發生錯誤。');
                 };
-                reader.readAsText(file); 
-                importFile.value = ''; 
+                reader.readAsText(file);
+                importFile.value = '';
             });
-            
+
             editTransactionCancelBtn.addEventListener('click', () => hideModal(editTransactionModal));
             editTransactionForm.addEventListener('submit', (e) => {
-                e.preventDefault(); 
+                e.preventDefault();
                 const id = parseInt(document.getElementById('edit-transaction-id').value, 10);
                 const newSymbol = document.getElementById('edit-symbol').value.trim().toUpperCase();
                 const newDate = document.getElementById('edit-date').value;
                 const newShares = parseFloat(document.getElementById('edit-shares').value);
-                const newPrice = parseFloat(document.getElementById('edit-price').value); 
-                
-                const currentAccountData = appData.accounts[appData.currentAccount]; 
-                const currentTransactions = currentAccountData.transactions; 
-                const feeDiscount = currentAccountData.feeDiscount; 
+                const newPrice = parseFloat(document.getElementById('edit-price').value);
+
+                const currentAccountData = appData.accounts[appData.currentAccount];
+                const currentTransactions = currentAccountData.transactions;
+                const feeDiscount = currentAccountData.feeDiscount;
                 const marketType = currentAccountData.marketType || 'TW';
 
                 const txIndex = currentTransactions.findIndex(t => t.id === id);
-                if (txIndex === -1) return; 
-                
-                const originalSymbol = currentTransactions[txIndex].symbol; 
-                const transactionType = currentTransactions[txIndex].type; 
+                if (txIndex === -1) return;
+
+                const originalSymbol = currentTransactions[txIndex].symbol;
+                const transactionType = currentTransactions[txIndex].type;
 
                 if (!newSymbol) { showModal(messageModal, '輸入錯誤', '股票代號不能為空。'); return; }
                 if (isNaN(newShares) || newShares <= 0) { showModal(messageModal, '輸入錯誤', '請檢查股數是否為有效的正數。'); return; }
@@ -1901,11 +2533,11 @@
 
                 const tempTransactions = JSON.parse(JSON.stringify(currentTransactions));
                 const tempTxToUpdate = tempTransactions.find(t => t.id === id);
-                
+
                 tempTxToUpdate.symbol = newSymbol;
                 tempTxToUpdate.date = newDate;
                 tempTxToUpdate.shares = newShares;
-                tempTxToUpdate.price = newPrice; 
+                tempTxToUpdate.price = newPrice;
 
                 // *** 修改 ***: 根據市場類型重新計算費用和總成本
                 // 使用新的輔助函式計算
@@ -1917,36 +2549,36 @@
                 } else {
                     delete tempTxToUpdate.totalTxCost; // 賣單沒有總成本
                 }
-                
+
                 const affectedSymbols = new Set([originalSymbol, newSymbol]);
                 for (const symbol of affectedSymbols) {
-                     const symbolSellTxs = tempTransactions.filter(tx => tx.symbol === symbol && tx.type === 'SELL');
-                     const totalSold = symbolSellTxs.reduce((sum, tx) => sum + tx.shares, 0);
-                     const symbolBuyTxs = tempTransactions.filter(tx => tx.symbol === symbol && tx.type === 'BUY');
-                     const totalBought = symbolBuyTxs.reduce((sum, tx) => sum + tx.shares, 0);
+                    const symbolSellTxs = tempTransactions.filter(tx => tx.symbol === symbol && tx.type === 'SELL');
+                    const totalSold = symbolSellTxs.reduce((sum, tx) => sum + tx.shares, 0);
+                    const symbolBuyTxs = tempTransactions.filter(tx => tx.symbol === symbol && tx.type === 'BUY');
+                    const totalBought = symbolBuyTxs.reduce((sum, tx) => sum + tx.shares, 0);
 
                     if (totalSold > totalBought) {
                         showModal(messageModal, '編輯失敗', `此修改會導致股票 ${symbol} 的庫存變為負數，請重新檢查。`);
-                        return; 
+                        return;
                     }
                 }
 
                 const transactionToUpdate = currentTransactions[txIndex];
                 transactionToUpdate.symbol = newSymbol;
-                transactionToUpdate.name = stockNameMap[newSymbol] || ''; 
+                transactionToUpdate.name = stockNameMap[newSymbol] || '';
                 transactionToUpdate.date = newDate;
                 transactionToUpdate.shares = newShares;
-                transactionToUpdate.price = newPrice; 
-                transactionToUpdate.fee = tempTxToUpdate.fee; 
+                transactionToUpdate.price = newPrice;
+                transactionToUpdate.fee = tempTxToUpdate.fee;
                 if (transactionType === 'BUY') {
-                    transactionToUpdate.totalTxCost = tempTxToUpdate.totalTxCost; 
+                    transactionToUpdate.totalTxCost = tempTxToUpdate.totalTxCost;
                 } else {
-                    delete transactionToUpdate.totalTxCost; 
+                    delete transactionToUpdate.totalTxCost;
                 }
-                
+
                 saveDataToFirebase(); // *** Firebase 修改 ***
-                hideModal(editTransactionModal); 
-                
+                hideModal(editTransactionModal);
+
                 let zeroedOutSymbol = null;
                 for (const symbol of affectedSymbols) {
                     const holdings = getCurrentHoldings(symbol, currentTransactions);
@@ -1954,8 +2586,8 @@
                     if (remainingShares === 0) {
                         const hasActiveTxs = currentTransactions.some(tx => tx.symbol === symbol && !tx.deletionTimestamp);
                         if (hasActiveTxs) {
-                           zeroedOutSymbol = symbol; 
-                           break; 
+                            zeroedOutSymbol = symbol;
+                            break;
                         }
                     }
                 }
@@ -1964,53 +2596,53 @@
                     symbolToClear = zeroedOutSymbol;
                     clearHistoryMessage.textContent = `編輯後，股票 ${zeroedOutSymbol} 的庫存已為零，是否要清除其所有相關交易歷史紀錄？`;
                     showModal(clearHistoryModal);
-                } 
+                }
                 else {
                     updateStockFilterOptions();
-                    render(); 
+                    render();
                 }
             });
 
             function handleSymbolInput(e) {
-                clearTimeout(debounceTimer); 
-                const symbol = e.target.value.trim().toUpperCase(); 
-                const nameDisplayId = `tx-symbol-name`; 
+                clearTimeout(debounceTimer);
+                const symbol = e.target.value.trim().toUpperCase();
+                const nameDisplayId = `tx-symbol-name`;
                 const nameDisplayEl = document.getElementById(nameDisplayId);
-                
+
                 const editNameDisplayEl = document.getElementById('edit-symbol-name');
                 const targetEl = e.target.id === 'edit-symbol' ? editNameDisplayEl : nameDisplayEl;
 
-                if (!targetEl) return; 
+                if (!targetEl) return;
 
                 debounceTimer = setTimeout(() => {
                     if (stockNameMap[symbol]) {
                         targetEl.textContent = stockNameMap[symbol];
                     } else {
-                        targetEl.textContent = ''; 
+                        targetEl.textContent = '';
                     }
                 }, 300);
             }
 
             // --- 程式進入點 (修改) ---
             // 移除 initializeApp_Local();
-            
+
             setDateToToday(); // 設定日期預設值 (保留)
-            
+
             // 綁定可摺疊區塊的點擊事件 (*** 最終修正 ***)
             collapsibleHeader.addEventListener('click', () => {
-                
+
                 // 檢查目前是否有 "is-open" class
                 if (collapsibleContent.classList.contains('is-open')) {
-                    
+
                     // --- 執行收合 ---
                     collapsibleContent.classList.remove('is-open');
-                    collapseIcon.style.transform = 'rotate(-90deg)'; 
-                    localStorage.setItem('isFormCollapsed_SharesOnly', 'true'); 
+                    collapseIcon.style.transform = 'rotate(-90deg)';
+                    localStorage.setItem('isFormCollapsed_SharesOnly', 'true');
 
                 } else {
-                    
+
                     // --- 執行展開 ---
-                    
+
                     // *** 關鍵修正 ***:
                     // 在 "展開" 的這一刻，我們才去抓取 scrollHeight
                     // 這時候點擊事件發生，區塊 100% 已經被渲染，scrollHeight 絕對是正確的值
@@ -2018,8 +2650,8 @@
                     collapsibleContent.style.setProperty('--content-height', contentHeight);
 
                     collapsibleContent.classList.add('is-open');
-                    collapseIcon.style.transform = 'rotate(0deg)'; 
-                    localStorage.setItem('isFormCollapsed_SharesOnly', 'false'); 
+                    collapseIcon.style.transform = 'rotate(0deg)';
+                    localStorage.setItem('isFormCollapsed_SharesOnly', 'false');
                 }
             });
 
@@ -2029,7 +2661,7 @@
 
 
             // *** Firebase 修改 ***: 加入認證與登入/登出邏輯
-            
+
             // 監聽登入按鈕
             loginBtn.addEventListener('click', () => {
                 auth.signInWithPopup(provider)
@@ -2071,7 +2703,7 @@
                     // 隱藏使用者資訊和登出按鈕
                     logoutBtn.parentElement.classList.add('hidden');
                     userDisplay.textContent = '';
-                    
+
                     // 清理狀態
                     appData = {};
                     currentUid = null;
@@ -2083,7 +2715,341 @@
                 }
             });
 
+            // =============================================
+            // === Tab 切換邏輯 ===
+            // =============================================
+            function switchTab(tabName) {
+                if (tabName === 'dashboard') {
+                    tabDashboard.classList.remove('hidden');
+                    tabJournal.classList.add('hidden');
+                    tabBtnDashboard.classList.add('tab-active');
+                    tabBtnJournal.classList.remove('tab-active');
+                } else {
+                    tabDashboard.classList.add('hidden');
+                    tabJournal.classList.remove('hidden');
+                    tabBtnJournal.classList.add('tab-active');
+                    tabBtnDashboard.classList.remove('tab-active');
+                    renderJournalCalendar();
+                }
+            }
+            tabBtnDashboard.addEventListener('click', () => switchTab('dashboard'));
+            tabBtnJournal.addEventListener('click', () => switchTab('journal'));
+
+            // =============================================
+            // === 交易日誌 (Journal Trade) 邏輯 ===
+            // =============================================
+            const journalEls = {
+                clearMonthBtn: document.getElementById("journalTradeClearMonthBtn"),
+                privacyBtn: document.getElementById("journalTradePrivacyBtn"),
+                appContainer: document.getElementById("journal-trade-app"),
+                exportBtn: document.getElementById("journalTradeExportBtn"),
+                importInput: document.getElementById("journalTradeImportInput"),
+                monthLabel: document.getElementById("journalTradeMonthLabel"),
+                prevMonthBtn: document.getElementById("journalTradePrevMonthBtn"),
+                nextMonthBtn: document.getElementById("journalTradeNextMonthBtn"),
+                todayBtn: document.getElementById("journalTradeTodayBtn"),
+                calendarGrid: document.getElementById("journalTradeCalendarGrid"),
+                modal: document.getElementById("journal-trade-app-modal"),
+                modalTitle: document.getElementById("journalTradeModalDateTitle"),
+                deleteNoteBtn: document.getElementById("journalTradeDeleteNoteBtn"),
+                textarea: document.getElementById("journalTradeNoteTextarea"),
+                cancelNoteBtn: document.getElementById("journalTradeCancelNoteBtn"),
+                saveNoteBtn: document.getElementById("journalTradeSaveNoteBtn")
+            };
+
+            const journalNow = new Date();
+            const JOURNAL_TODAY_YEAR = journalNow.getFullYear();
+            const JOURNAL_TODAY_MONTH = journalNow.getMonth();
+            const JOURNAL_TODAY_DATE = journalNow.getDate();
+
+            let journalViewYear = JOURNAL_TODAY_YEAR;
+            let journalViewMonth = JOURNAL_TODAY_MONTH;
+            let journalCurrentMonthData = {};
+            let journalEditingDay = null;
+
+            const JOURNAL_DEFAULT_TEMPLATE = `💰️`;
+
+            // --- 日誌資料讀取/儲存 (使用 appData.journal + Firebase) ---
+            function getJournalKey(year, monthIndex) {
+                return `${year}-${monthIndex + 1}`;
+            }
+
+            function loadJournalMonthData(year, monthIndex) {
+                const key = getJournalKey(year, monthIndex);
+                if (appData.journal && appData.journal[key]) {
+                    return JSON.parse(JSON.stringify(appData.journal[key])); // 深拷貝
+                }
+                return {};
+            }
+
+            function saveJournalCurrentMonthData() {
+                if (!appData.journal) appData.journal = {};
+                const key = getJournalKey(journalViewYear, journalViewMonth);
+                // 如果該月沒有任何筆記，就刪除該 key，避免存空物件
+                if (Object.keys(journalCurrentMonthData).length === 0) {
+                    delete appData.journal[key];
+                } else {
+                    appData.journal[key] = JSON.parse(JSON.stringify(journalCurrentMonthData));
+                }
+                saveDataToFirebase();
+            }
+
+            // --- 日曆渲染 ---
+            function getJournalMonthDetails(year, monthIndex) {
+                const firstDay = new Date(year, monthIndex, 1).getDay();
+                const daysInMonth = new Date(year, monthIndex + 1, 0).getDate();
+                return { firstDay, daysInMonth };
+            }
+
+            function journalEscapeHtml(text) {
+                if (!text) return "";
+                return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+            }
+
+            function renderJournalCalendar() {
+                if (!journalEls.monthLabel) return; // 元素尚未存在
+                journalEls.monthLabel.textContent = `${journalViewYear} 年 ${journalViewMonth + 1} 月`;
+                journalCurrentMonthData = loadJournalMonthData(journalViewYear, journalViewMonth);
+                const grid = journalEls.calendarGrid;
+                grid.innerHTML = "";
+
+                const { firstDay, daysInMonth } = getJournalMonthDetails(journalViewYear, journalViewMonth);
+
+                // 填充前方空白
+                for (let i = 0; i < firstDay; i++) {
+                    const emptyCell = document.createElement("div");
+                    emptyCell.className = "day-cell other-month";
+                    grid.appendChild(emptyCell);
+                }
+
+                // 填充日期
+                for (let day = 1; day <= daysInMonth; day++) {
+                    const cell = document.createElement("div");
+                    cell.className = "day-cell";
+
+                    const currentWeekDay = new Date(journalViewYear, journalViewMonth, day).getDay();
+                    if (currentWeekDay === 0 || currentWeekDay === 6) cell.classList.add("is-weekend");
+
+                    if (journalViewYear === JOURNAL_TODAY_YEAR && journalViewMonth === JOURNAL_TODAY_MONTH && day === JOURNAL_TODAY_DATE) {
+                        cell.classList.add("is-today");
+                    }
+
+                    const noteContent = journalCurrentMonthData[day] || "";
+                    if (noteContent) cell.classList.add("has-note");
+
+                    cell.innerHTML = `
+                        <div class="day-number">${day}</div>
+                        <div class="note-preview">${journalEscapeHtml(noteContent)}</div>
+                        <div class="more-indicator" title="還有更多內容..."></div>
+                    `;
+
+                    cell.addEventListener("click", () => openJournalModal(day));
+                    grid.appendChild(cell);
+                }
+
+                // 補齊最後一行
+                const totalCells = firstDay + daysInMonth;
+                const remaining = 7 - (totalCells % 7);
+                if (remaining < 7) {
+                    for (let i = 0; i < remaining; i++) {
+                        const emptyCell = document.createElement("div");
+                        emptyCell.className = "day-cell other-month";
+                        grid.appendChild(emptyCell);
+                    }
+                }
+
+                // 檢查是否有內容溢出
+                setTimeout(() => {
+                    const previews = grid.querySelectorAll(".note-preview");
+                    previews.forEach(el => {
+                        if (el.scrollHeight > el.clientHeight) {
+                            el.parentElement.classList.add("is-overflowing");
+                        }
+                    });
+                }, 0);
+            }
+
+            // --- Modal 邏輯 ---
+            function openJournalModal(day) {
+                journalEditingDay = day;
+                journalEls.modalTitle.textContent = `${journalViewYear} 年 ${journalViewMonth + 1} 月 ${day} 日`;
+                journalEls.textarea.value = journalCurrentMonthData[day] || JOURNAL_DEFAULT_TEMPLATE;
+                journalEls.modal.style.display = "flex";
+                journalEls.textarea.focus();
+            }
+
+            function closeJournalModal() {
+                journalEls.modal.style.display = "none";
+                journalEditingDay = null;
+            }
+
+            function saveJournalNote() {
+                if (journalEditingDay === null) return;
+                const text = journalEls.textarea.value.trim();
+                if (text) journalCurrentMonthData[journalEditingDay] = text;
+                else delete journalCurrentMonthData[journalEditingDay];
+                saveJournalCurrentMonthData();
+                renderJournalCalendar();
+                closeJournalModal();
+            }
+
+            journalEls.cancelNoteBtn.addEventListener("click", closeJournalModal);
+            journalEls.saveNoteBtn.addEventListener("click", saveJournalNote);
+
+            journalEls.deleteNoteBtn.addEventListener("click", () => {
+                if (confirm("確定要清空這天的內容嗎？")) {
+                    journalEls.textarea.value = "";
+                    saveJournalNote();
+                }
+            });
+
+            journalEls.modal.addEventListener("click", (e) => {
+                if (e.target === journalEls.modal) saveJournalNote();
+            });
+
+            // --- 月份切換 ---
+            function changeJournalMonth(offset) {
+                const newDate = new Date(journalViewYear, journalViewMonth + offset, 1);
+                journalViewYear = newDate.getFullYear();
+                journalViewMonth = newDate.getMonth();
+                renderJournalCalendar();
+            }
+
+            journalEls.prevMonthBtn.addEventListener("click", () => changeJournalMonth(-1));
+            journalEls.nextMonthBtn.addEventListener("click", () => changeJournalMonth(1));
+            journalEls.todayBtn.addEventListener("click", () => {
+                journalViewYear = JOURNAL_TODAY_YEAR;
+                journalViewMonth = JOURNAL_TODAY_MONTH;
+                renderJournalCalendar();
+            });
+
+            // --- 日誌匯出 (獨立) ---
+            journalEls.exportBtn.addEventListener("click", () => {
+                if (!appData.journal || Object.keys(appData.journal).length === 0) {
+                    showModal(messageModal, '提示', '目前沒有任何日誌資料可匯出。');
+                    return;
+                }
+                const blob = new Blob([JSON.stringify(appData.journal, null, 2)], { type: "application/json" });
+                const a = document.createElement("a");
+                a.href = URL.createObjectURL(blob);
+                a.download = `journal_trade_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                a.click();
+                URL.revokeObjectURL(a.href);
+                showModal(messageModal, '匯出成功', '日誌資料已成功匯出為 JSON 檔案。');
+            });
+
+            // --- 日誌匯入 (獨立) ---
+            journalEls.importInput.addEventListener("change", (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    try {
+                        const imported = JSON.parse(ev.target.result);
+                        if (typeof imported !== 'object' || imported === null) {
+                            throw new Error('格式錯誤');
+                        }
+                        if (confirm("匯入將會覆蓋相同月份的現有日誌資料，確定要繼續嗎？")) {
+                            if (!appData.journal) appData.journal = {};
+                            // 合併匯入的資料
+                            Object.keys(imported).forEach(k => {
+                                appData.journal[k] = imported[k];
+                            });
+                            saveDataToFirebase();
+                            renderJournalCalendar();
+                            showModal(messageModal, '匯入成功', '日誌資料已成功匯入並同步至雲端。');
+                        }
+                    } catch (err) {
+                        showModal(messageModal, '匯入失敗', `檔案格式錯誤。(${err.message})`);
+                    }
+                };
+                reader.readAsText(file);
+                e.target.value = '';
+            });
+
+            // --- 清除本月 ---
+            journalEls.clearMonthBtn.addEventListener("click", () => {
+                if (confirm(`⚠️ 警告：\n確定要清除【${journalViewYear} 年 ${journalViewMonth + 1} 月】的所有日誌嗎？`)) {
+                    journalCurrentMonthData = {};
+                    saveJournalCurrentMonthData();
+                    renderJournalCalendar();
+                    showModal(messageModal, '已清除', `${journalViewYear} 年 ${journalViewMonth + 1} 月的日誌已清除。`);
+                }
+            });
+
+            // --- 隱私模式 ---
+            let journalIsPrivacyMode = false;
+            journalEls.privacyBtn.addEventListener("click", () => {
+                journalIsPrivacyMode = !journalIsPrivacyMode;
+                if (journalIsPrivacyMode) {
+                    journalEls.appContainer.classList.add("privacy-active");
+                    journalEls.privacyBtn.textContent = "🕶️ 內容已隱藏";
+                } else {
+                    journalEls.appContainer.classList.remove("privacy-active");
+                    journalEls.privacyBtn.textContent = "👓️ 顯示/隱藏";
+                }
+            });
+            // 預設啟動隱私模式
+            journalEls.privacyBtn.click();
+
+            // =============================================
+            // === 全部匯出/匯入 (持股 + 日誌) ===
+            // =============================================
+            globalExportBtn.addEventListener('click', () => {
+                // 建立乾淨的匯出資料
+                const exportData = JSON.parse(JSON.stringify(appData));
+                // 移除合併帳戶
+                if (exportData.accounts && exportData.accounts[MERGED_ACCOUNT_NAME]) {
+                    delete exportData.accounts[MERGED_ACCOUNT_NAME];
+                }
+                if (exportData.currentAccount === MERGED_ACCOUNT_NAME) {
+                    exportData.currentAccount = Object.keys(exportData.accounts)[0] || '預設帳戶';
+                }
+
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(blob);
+                a.download = `full_backup_${new Date().toISOString().slice(0, 10)}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(a.href);
+                showModal(messageModal, '全部匯出成功', '持股紀錄 + 交易日誌已全部匯出為 JSON 檔案。');
+            });
+
+            globalImportBtn.addEventListener('click', () => globalImportFile.click());
+            globalImportFile.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const importedData = JSON.parse(event.target.result);
+                        if (importedData.accounts && importedData.currentAccount) {
+                            if (!confirm('確定要匯入嗎？這將覆蓋所有目前的持股紀錄與交易日誌。')) return;
+                            appData = importedData;
+                            if (!appData.journal) appData.journal = {};
+                            currentPage = 1;
+                            saveDataToFirebase();
+                            renderJournalCalendar();
+                            showModal(messageModal, '全部匯入成功', '持股紀錄 + 交易日誌已全部匯入並同步至雲端。');
+                        } else {
+                            throw new Error('檔案格式不符');
+                        }
+                    } catch (error) {
+                        showModal(messageModal, '匯入失敗', `檔案格式不正確或已損毀。(${error.message})`);
+                    }
+                };
+                reader.onerror = () => {
+                    showModal(messageModal, '匯入失敗', '讀取檔案時發生錯誤。');
+                };
+                reader.readAsText(file);
+                globalImportFile.value = '';
+            });
+
         });
     </script>
 </body>
+
 </html>
