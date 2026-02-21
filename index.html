@@ -1548,33 +1548,30 @@
                     cleanupExpiredTransactions(); // (此函式內部會呼叫 saveDataToFirebase)
 
                     // --- 恢復摺疊狀態 (*** 最終修正 ***) ---
-                    const isCollapsed = localStorage.getItem('isFormCollapsed_SharesOnly') === 'true';
-
-                    // 關鍵: 
-                    // 我們在 JS 中計算一次正確的高度(即使是 0px 也沒關係)，並存為 CSS 變數
-                    // 這樣 CSS 就可以在任何時候使用它
-                    const contentHeight = collapsibleContent.scrollHeight + "px";
-                    collapsibleContent.style.setProperty('--content-height', contentHeight);
+                    // --- 恢復摺疊狀態 (*** 最終修正 ***) ---
+                    // 注意: localStorage 沒有值時預設為收合 (因為 dashboard tab 預設 hidden，scrollHeight=0)
+                    const isCollapsed = localStorage.getItem('isFormCollapsed_SharesOnly') !== 'false';
 
                     if (isCollapsed) {
-                        // 如果是收合狀態, 確保沒有 .is-open class
+                        // 收合狀態
                         collapsibleContent.classList.remove('is-open');
                         collapseIcon.style.transform = 'rotate(-90deg)';
                     } else {
-                        // 如果是展開狀態, 加上 .is-open class
-                        // 就算此時 contentHeight 是 0px, 點擊時也會被修正
+                        // 展開狀態
+                        const contentHeight = collapsibleContent.scrollHeight + "px";
+                        collapsibleContent.style.setProperty('--content-height', contentHeight);
                         collapsibleContent.classList.add('is-open');
                         collapseIcon.style.transform = 'rotate(0deg)';
                     }
 
                     // --- 恢復投資組合總覽的摺疊狀態 ---
-                    const isPortfolioCollapsed = localStorage.getItem('isPortfolioCollapsed') === 'true';
-                    const portfolioHeight = portfolioCollapsibleContent.scrollHeight + "px";
-                    portfolioCollapsibleContent.style.setProperty('--content-height', portfolioHeight);
+                    const isPortfolioCollapsed = localStorage.getItem('isPortfolioCollapsed') !== 'false';
                     if (isPortfolioCollapsed) {
                         portfolioCollapsibleContent.classList.remove('is-open');
                         portfolioCollapseIcon.style.transform = 'rotate(-90deg)';
                     } else {
+                        const portfolioHeight = portfolioCollapsibleContent.scrollHeight + "px";
+                        portfolioCollapsibleContent.style.setProperty('--content-height', portfolioHeight);
                         portfolioCollapsibleContent.classList.add('is-open');
                         portfolioCollapseIcon.style.transform = 'rotate(0deg)';
                     }
