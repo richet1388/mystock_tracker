@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📈雲端儀表板 📊</title>
+    <title>📈儀表板📊</title>
     <link rel="icon" href="ElienOnly.ico" type="image/ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -28,7 +28,7 @@
             storageBucket: "stock-tracker-940de.firebasestorage.app",
             messagingSenderId: "546233071753",
             appId: "1:546233071753:web:c95d9bece5dd10aa83ae58"
-                    };
+        };
 
         // 初始化 Firebase
         firebase.initializeApp(firebaseConfig);
@@ -167,13 +167,13 @@
 
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">🇹🇼 🇺🇸 ➡️ 🥦 🔥 (雲端同步版v4)</p>
+            <p class="mt-2 text-lg text-stone-400">Version 5</p>
         </header>
 
         <!-- Tab 切換列 -->
         <div class="tab-bar mb-6">
-            <button id="tab-btn-dashboard" class="tab-btn tab-active">📈 持股儀表板</button>
-            <button id="tab-btn-journal" class="tab-btn">📅 交易日誌</button>
+            <button id="tab-btn-dashboard" class="tab-btn">📈 交易記錄</button>
+            <button id="tab-btn-journal" class="tab-btn tab-active">📅 日誌記錄</button>
             <div class="tab-global-btns">
                 <button id="global-export-btn" class="tab-global-btn" title="匯出所有資料（持股＋日誌）">📦 全部匯出</button>
                 <button id="global-import-btn" class="tab-global-btn" title="匯入所有資料（持股＋日誌）">📦 全部匯入</button>
@@ -182,7 +182,7 @@
         </div>
 
         <!-- Tab: 持股儀表板 -->
-        <main id="tab-dashboard" class="space-y-8">
+        <main id="tab-dashboard" class="space-y-8 hidden">
             <div class="bg-stone-800 p-4 rounded-2xl shadow-lg border border-stone-700 space-y-3">
                 <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
                     <div class="md:col-span-5">
@@ -217,37 +217,46 @@
                 </div>
             </div>
 
-            <div class="bg-stone-800 p-6 rounded-2xl shadow-lg border border-stone-700 space-y-4">
-                <h2 id="view-title" class="text-2xl font-bold text-stone-100 tracking-tight">總覽</h2>
-                <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                    <div class="md:col-span-2">
-                        <label for="stock-search"
-                            class="block text-sm font-medium text-transparent mb-2">搜尋或選擇檢視項目</label>
-                        <input type="text" id="stock-search" placeholder="輸入代號篩選..."
-                            class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition">
-                    </div>
-                    <div class="md:col-span-4">
-                        <label for="stock-filter"
-                            class="block text-sm font-medium text-stone-300 mb-2 select-none">選單篩選</label>
-                        <select id="stock-filter"
-                            class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
-                    </div>
-                    <div class="md:col-span-2">
-                        <label id="shares-title" class="block text-sm font-medium text-stone-300 mb-2">全部檔數</label>
-                        <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
-                            <p id="totalShares" class="text-lg font-bold text-sky-400 text-center">0</p>
+            <div class="bg-stone-800 rounded-2xl shadow-lg border border-stone-700 space-y-4">
+                <div id="portfolio-collapsible-header"
+                    class="p-6 pb-0 cursor-pointer flex justify-between items-center">
+                    <h2 id="view-title" class="text-2xl font-bold text-stone-100 tracking-tight">總覽</h2>
+                    <span id="portfolio-collapse-icon"
+                        class="text-stone-400 transform transition-transform duration-300">▼</span>
+                </div>
+                <div id="portfolio-collapsible-content" class="collapsible-content px-6 pb-6">
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                        <div class="md:col-span-2">
+                            <label for="stock-search"
+                                class="block text-sm font-medium text-transparent mb-2">搜尋或選擇檢視項目</label>
+                            <input type="text" id="stock-search" placeholder="輸入代號篩選..."
+                                class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition">
                         </div>
-                    </div>
-                    <div id="avg-cost-box" class="md:col-span-2">
-                        <label id="avg-cost-title" class="block text-sm font-medium text-stone-300 mb-2">平均成本</label>
-                        <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
-                            <p id="avgCost" class="text-lg font-bold text-sky-400 text-center">0</p>
+                        <div class="md:col-span-4">
+                            <label for="stock-filter"
+                                class="block text-sm font-medium text-stone-300 mb-2 select-none">選單篩選</label>
+                            <select id="stock-filter"
+                                class="w-full bg-stone-900 border-stone-700 rounded-lg shadow-sm focus:ring-sky-400 focus:border-sky-400 text-stone-300 p-2.5 transition"></select>
                         </div>
-                    </div>
-                    <div id="total-cost-box" class="md:col-span-2">
-                        <label id="total-cost-title" class="block text-sm font-medium text-stone-300 mb-2">總成本</label>
-                        <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
-                            <p id="totalCost" class="text-lg font-bold text-sky-400 text-center">0</p>
+                        <div class="md:col-span-2">
+                            <label id="shares-title" class="block text-sm font-medium text-stone-300 mb-2">全部檔數</label>
+                            <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
+                                <p id="totalShares" class="text-lg font-bold text-sky-400 text-center">0</p>
+                            </div>
+                        </div>
+                        <div id="avg-cost-box" class="md:col-span-2">
+                            <label id="avg-cost-title"
+                                class="block text-sm font-medium text-stone-300 mb-2">平均成本</label>
+                            <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
+                                <p id="avgCost" class="text-lg font-bold text-sky-400 text-center">0</p>
+                            </div>
+                        </div>
+                        <div id="total-cost-box" class="md:col-span-2">
+                            <label id="total-cost-title"
+                                class="block text-sm font-medium text-stone-300 mb-2">總成本</label>
+                            <div class="bg-stone-900 px-4 py-2 rounded-lg border border-stone-700">
+                                <p id="totalCost" class="text-lg font-bold text-sky-400 text-center">0</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -338,7 +347,7 @@
         </main>
 
         <!-- Tab: 交易日誌 -->
-        <div id="tab-journal" class="hidden">
+        <div id="tab-journal" class="">
             <div id="journal-trade-app">
                 <style>
                     /* =========================================
@@ -741,9 +750,9 @@
                 <div class="container">
                     <div class="top-bar">
                         <div class="top-left-block">
-                            <h1>📅 ARK日誌</h1>
+                            <h1>📅 日誌</h1>
                             <p style="margin: 0 0 8px 0; font-size: 14px; line-height: 1.2;">
-                                🎯📣🌐📝📜🔥⚡️🚩📌📍✅❎☑️❌🔍️ 🚧 🛠️ 🚦 💰️📢⚠️⛔️🚫 ⬆️⬇️⬅️➡️ 🇹🇼 🇺🇸🥦
+                                💰️💰️💰️💰️💰️💰️💰️💰️
                             </p>
                             <div style="margin-top:8px;">
                                 <button class="btn btn-danger" id="journalTradeClearMonthBtn"
@@ -1058,6 +1067,10 @@
             const collapsibleHeader = document.getElementById('collapsible-header'); // 新增交易區塊的標頭
             const collapsibleContent = document.getElementById('collapsible-content'); // 新增交易區塊的內容
             const collapseIcon = document.getElementById('collapse-icon'); // 摺疊圖標
+            // 投資組合總覽可摺疊區塊
+            const portfolioCollapsibleHeader = document.getElementById('portfolio-collapsible-header');
+            const portfolioCollapsibleContent = document.getElementById('portfolio-collapsible-content');
+            const portfolioCollapseIcon = document.getElementById('portfolio-collapse-icon');
             // 編輯交易 Modal 相關元素
             const editTransactionModal = document.getElementById('edit-transaction-modal'); // 編輯交易 Modal
             const editTransactionForm = document.getElementById('edit-transaction-form');
@@ -1553,6 +1566,18 @@
                         // 就算此時 contentHeight 是 0px, 點擊時也會被修正
                         collapsibleContent.classList.add('is-open');
                         collapseIcon.style.transform = 'rotate(0deg)';
+                    }
+
+                    // --- 恢復投資組合總覽的摺疊狀態 ---
+                    const isPortfolioCollapsed = localStorage.getItem('isPortfolioCollapsed') === 'true';
+                    const portfolioHeight = portfolioCollapsibleContent.scrollHeight + "px";
+                    portfolioCollapsibleContent.style.setProperty('--content-height', portfolioHeight);
+                    if (isPortfolioCollapsed) {
+                        portfolioCollapsibleContent.classList.remove('is-open');
+                        portfolioCollapseIcon.style.transform = 'rotate(-90deg)';
+                    } else {
+                        portfolioCollapsibleContent.classList.add('is-open');
+                        portfolioCollapseIcon.style.transform = 'rotate(0deg)';
                     }
 
                     // --- 確保 journal 欄位存在 ---
@@ -2667,6 +2692,20 @@
                 }
             });
 
+            // 綁定投資組合總覽可摺疊區塊的點擊事件
+            portfolioCollapsibleHeader.addEventListener('click', () => {
+                if (portfolioCollapsibleContent.classList.contains('is-open')) {
+                    portfolioCollapsibleContent.classList.remove('is-open');
+                    portfolioCollapseIcon.style.transform = 'rotate(-90deg)';
+                    localStorage.setItem('isPortfolioCollapsed', 'true');
+                } else {
+                    const contentHeight = portfolioCollapsibleContent.scrollHeight + "px";
+                    portfolioCollapsibleContent.style.setProperty('--content-height', contentHeight);
+                    portfolioCollapsibleContent.classList.add('is-open');
+                    portfolioCollapseIcon.style.transform = 'rotate(0deg)';
+                    localStorage.setItem('isPortfolioCollapsed', 'false');
+                }
+            });
             // 綁定股票代號輸入框的輸入事件 (保留)
             document.getElementById('tx-symbol').addEventListener('input', handleSymbolInput);
             document.getElementById('edit-symbol').addEventListener('input', handleSymbolInput);
@@ -3002,7 +3041,7 @@
                 }
             });
             // 預設啟動隱私模式
-            journalEls.privacyBtn.click();
+            //journalEls.privacyBtn.click();
 
             // =============================================
             // === 全部匯出/匯入 (持股 + 日誌) ===
