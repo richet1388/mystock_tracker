@@ -2773,6 +2773,15 @@
                     tabJournal.classList.add('hidden');
                     tabBtnDashboard.classList.add('tab-active');
                     tabBtnJournal.classList.remove('tab-active');
+                    // 重新計算展開高度（因為 hidden 時 scrollHeight 為 0）
+                    setTimeout(() => {
+                        if (collapsibleContent.classList.contains('is-open')) {
+                            collapsibleContent.style.setProperty('--content-height', collapsibleContent.scrollHeight + "px");
+                        }
+                        if (portfolioCollapsibleContent.classList.contains('is-open')) {
+                            portfolioCollapsibleContent.style.setProperty('--content-height', portfolioCollapsibleContent.scrollHeight + "px");
+                        }
+                    }, 0);
                 } else {
                     tabDashboard.classList.add('hidden');
                     tabJournal.classList.remove('hidden');
