@@ -730,10 +730,9 @@
                                         style="padding:4px 8px; border:none; margin:0;">🔍</button>
                                 </div>
 
-                                <button class="btn btn-primary" id="journalTradeExportBtn">⬇ 匯出日誌備份</button>
-                                <label class="btn btn-primary">⬆ 匯入日誌<input type="file" id="journalTradeImportInput"
+                                <button class="btn btn-primary" id="journalTradeExportBtn">⬇ 匯出</button>
+                                <label class="btn btn-primary">⬆ 匯入<input type="file" id="journalTradeImportInput"
                                         accept=".json"></label>
-                                <span class="hint-text">日誌資料已同步至雲端。</span>
                             </div>
                         </div>
                         <div class="month-control">
@@ -928,12 +927,23 @@
             const globalImportBtn = document.getElementById('globalImportBtn');
             const globalImportFile = document.getElementById('globalImportFile');
 
-            // *** Firebase 修改 ***: 獲取 Firebase 服務實例
-            const auth = firebase.auth();
-            const db = firebase.database();
-            const provider = new firebase.auth.GoogleAuthProvider();
+            const urlParams = new URLSearchParams(window.location.search);
+            const isTestMode = urlParams.get('test') === '1';
 
+            // *** Firebase 修改 ***: 獲取 Firebase 服務實例 (僅在非測試模式連線)
+            let auth = null;
+            let db = null;
+            let provider = null;
 
+            if (!isTestMode) {
+                try {
+                    auth = firebase.auth();
+                    db = firebase.database();
+                    provider = new firebase.auth.GoogleAuthProvider();
+                } catch (e) {
+                    console.error("Firebase 初始化失敗 (請檢查配置):", e);
+                }
+            }
 
             /**
              * *** Firebase 修改 ***:
@@ -942,6 +952,8 @@
              * @param {string} uid - 使用者的唯一 ID。
              */
             function setupDataListener(uid) {
+                if (isTestMode || !db) return; // 測試模式或無 DB 實例不連線
+
                 // 如果已有監聽器，先移除舊的，避免重複監聽
                 if (dataListener) {
                     dataListener.off();
@@ -990,6 +1002,8 @@
              * 取代 saveDataToLocalStorage()
              */
             function saveDataToFirebase() {
+                if (isTestMode) return; // 測試模式直接返回，不寫入雲端
+
                 // 必須要有使用者 UID 和資料庫實例才能儲存
                 if (!currentUid || !db) {
                     console.warn("尚未登入或 Firebase 未初始化，無法儲存資料。");
@@ -1030,6 +1044,10 @@
 
             // 監聽登入按鈕
             loginBtn.addEventListener('click', () => {
+                if (!auth || !provider) {
+                    showModal(messageModal, '登入失敗', 'Firebase 配置尚未設定，無法啟動登入視窗。請至原始碼填入 firebaseConfig。');
+                    return;
+                }
                 auth.signInWithPopup(provider)
                     .catch((error) => {
                         console.error("Google 登入失敗:", error);
@@ -1039,14 +1057,15 @@
 
             // 監聽登出按鈕
             logoutBtn.addEventListener('click', () => {
-                auth.signOut();
+                if (isTestMode) {
+                    window.location.href = window.location.pathname; // 離開測試模式
+                } else if (auth) {
+                    auth.signOut();
+                }
             });
 
-            // 監聽認證狀態變化 (程式的主要進入點)
-            auth.onAuthStateChanged((user) => {
-                const urlParams = new URLSearchParams(window.location.search);
-                const isTestMode = urlParams.get('test') === '1';
-
+            // 定義認證狀態處理函式
+            const handleAuthStateChange = (user) => {
                 if (user || isTestMode) {
                     // --- 使用者已登入 或 進入測試模式 ---
                     if (isTestMode) {
@@ -1093,7 +1112,8 @@
                         dataListener = null;
                     }
                 }
-            });
+            };
+
 
             // =============================================
             // === 交易日誌 (Journal Trade) 邏輯 ===
@@ -1667,6 +1687,14 @@
                     journalEls.privacyBtn.textContent = "👓️ 顯示/隱藏";
                 }
             });
+
+            if (isTestMode) {
+                // 測試模式直接觸發登入邏輯
+                handleAuthStateChange(null);
+            } else if (auth) {
+                // 正式模式且 auth 成功初始化時才掛載監聽器
+                auth.onAuthStateChanged(handleAuthStateChange);
+            }
 
         });
     </script>
