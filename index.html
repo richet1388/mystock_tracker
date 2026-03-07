@@ -168,7 +168,7 @@
 
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">Version 6</p>
+            <p class="mt-2 text-lg text-stone-400">Version 5</p>
         </header>
 
         <!-- Tab 切換列 -->
@@ -735,7 +735,42 @@
                         }
                     }
 
-                    #journal-trade-app.privacy-active .note-preview {
+                    #journal-trade-app .day-mood {
+                        font-size: 16px;
+                        display: inline-block;
+                    }
+
+                    #journal-trade-app .day-index {
+                        font-size: 11px;
+                        color: #38bdf8;
+                        font-weight: bold;
+                        background: rgba(56, 189, 248, 0.1);
+                        padding: 2px 4px;
+                        border-radius: 4px;
+                        margin-left: 4px;
+                        display: inline-block;
+                    }
+
+                    #journal-trade-app .day-badges {
+                        display: flex;
+                        flex-wrap: wrap;
+                        gap: 4px;
+                        margin-top: 2px;
+                        margin-bottom: 4px;
+                    }
+
+                    #journal-trade-app .day-badge {
+                        font-size: 10px;
+                        background: #475569;
+                        color: #e2e8f0;
+                        padding: 2px 4px;
+                        border-radius: 4px;
+                        white-space: nowrap;
+                    }
+
+                    #journal-trade-app.privacy-active .note-preview,
+                    #journal-trade-app.privacy-active .day-badges,
+                    #journal-trade-app.privacy-active .day-index {
                         filter: blur(6px);
                         opacity: 0.6;
                         user-select: none;
@@ -747,6 +782,104 @@
                         background-color: var(--journal-bg-today);
                         border-color: var(--journal-highlight-border);
                     }
+
+                    /* Search & Summary Modals */
+                    #journal-trade-app .search-result-item {
+                        background-color: var(--journal-bg-textarea);
+                        padding: 12px;
+                        border-radius: 6px;
+                        margin-bottom: 8px;
+                        border: 1px solid var(--journal-border-color);
+                        cursor: pointer;
+                        transition: all 0.2s;
+                    }
+
+                    #journal-trade-app .search-result-item:hover {
+                        border-color: var(--journal-accent-color);
+                        background-color: var(--journal-bg-hover);
+                    }
+
+                    #journal-trade-app .search-result-date {
+                        font-size: 14px;
+                        font-weight: bold;
+                        color: var(--journal-text-main);
+                        margin-bottom: 4px;
+                    }
+
+                    #journal-trade-app .search-result-note {
+                        font-size: 13px;
+                        color: var(--journal-text-muted);
+                        display: -webkit-box;
+                        -webkit-line-clamp: 2;
+                        line-clamp: 2;
+                        -webkit-box-orient: vertical;
+                        overflow: hidden;
+                    }
+
+                    #journal-trade-app-modal .summary-stat-box {
+                        background: var(--journal-bg-input);
+                        border: 1px solid var(--journal-border-color);
+                        padding: 16px;
+                        border-radius: 8px;
+                        text-align: center;
+                    }
+
+                    #journal-trade-app-modal .summary-stat-value {
+                        font-size: 24px;
+                        font-weight: bold;
+                        color: #fff;
+                        margin-bottom: 4px;
+                    }
+
+                    #journal-trade-app-modal .summary-stat-label {
+                        font-size: 12px;
+                        color: var(--journal-text-muted);
+                    }
+
+                    /* --- 新增欄位樣式 --- */
+                    #journal-trade-app-modal .form-row {
+                        display: flex;
+                        gap: 16px;
+                        margin-bottom: 16px;
+                    }
+
+                    #journal-trade-app-modal .form-col {
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                    }
+
+                    #journal-trade-app-modal .form-group {
+                        margin-bottom: 16px;
+                        display: flex;
+                        flex-direction: column;
+                        gap: 8px;
+                    }
+
+                    #journal-trade-app-modal label {
+                        font-size: 14px;
+                        color: var(--journal-text-main);
+                        font-weight: bold;
+                    }
+
+                    #journal-trade-app-modal input[type="text"],
+                    #journal-trade-app-modal input[type="number"],
+                    #journal-trade-app-modal select {
+                        width: 100%;
+                        background: var(--journal-bg-input);
+                        border: 1px solid var(--journal-border-color);
+                        border-radius: 6px;
+                        padding: 10px 12px;
+                        color: #fff;
+                        font-size: 14px;
+                    }
+
+                    #journal-trade-app-modal input:focus,
+                    #journal-trade-app-modal select:focus {
+                        outline: none;
+                        border-color: var(--journal-accent-color);
+                    }
                 </style>
 
                 <div class="container">
@@ -756,11 +889,21 @@
                             <p style="margin: 0 0 8px 0; font-size: 14px; line-height: 1.2;">
                                 💰️💰️💰️💰️💰️💰️💰️💰️
                             </p>
-                            <div style="margin-top:8px;">
-                                <button class="btn btn-danger" id="journalTradeClearMonthBtn"
-                                    style="margin-right: 8px;">🗑 清除本月</button>
-                                <button class="btn" id="journalTradePrivacyBtn" style="margin-right: 8px;">👁️
-                                    顯示/隱藏</button>
+                            <div
+                                style="margin-top:8px; display:inline-flex; align-items:center; flex-wrap:wrap; gap:8px;">
+                                <button class="btn btn-primary" id="journalTradeSummaryBtn"
+                                    style="background-color: #3b82f6; border-color: #2563eb;"> 每月摘要</button>
+                                <button class="btn btn-danger" id="journalTradeClearMonthBtn">🗑 清除本月</button>
+                                <button class="btn" id="journalTradePrivacyBtn">👁️ 顯示/隱藏</button>
+
+                                <div
+                                    style="display:inline-flex; align-items:center; border: 1px solid var(--journal-border-color); border-radius:4px; padding:2px; background:var(--journal-bg-input);">
+                                    <input type="text" id="journalTradeSearchInput" placeholder="搜尋日誌..."
+                                        style="background:transparent; border:none; color:#fff; font-size:13px; padding:4px 8px; outline:none; width:120px; font-family:inherit;">
+                                    <button class="btn" id="journalTradeSearchBtn"
+                                        style="padding:4px 8px; border:none; margin:0;">🔍</button>
+                                </div>
+
                                 <button class="btn btn-primary" id="journalTradeExportBtn">⬇ 匯出日誌備份</button>
                                 <label class="btn btn-primary">⬆ 匯入日誌<input type="file" id="journalTradeImportInput"
                                         accept=".json"></label>
@@ -789,18 +932,130 @@
                         <div class="calendar-grid" id="journalTradeCalendarGrid"></div>
                     </div>
                 </div>
-                <div class="modal-overlay" id="journal-trade-app-modal">
+                <div id="journal-trade-app-modal"
+                    style="z-index: 1000; display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--journal-modal-overlay); backdrop-filter: blur(5px);">
                     <div class="modal-box">
                         <div class="modal-header">
                             <div class="modal-title" id="journalTradeModalDateTitle">記事</div>
                             <button class="btn btn-danger" id="journalTradeDeleteNoteBtn"
                                 style="font-size:12px;">清空當日</button>
                         </div>
-                        <textarea class="modal-textarea" id="journalTradeNoteTextarea"
-                            placeholder="今天發生了什麼事..."></textarea>
+
+                        <div class="form-row">
+                            <div class="form-col">
+                                <label for="journalMoodSelect">心情指標</label>
+                                <select id="journalMoodSelect">
+                                    <option value="">-- 選擇心情指標--</option>
+                                    <option value="🤩">🤩 超讚</option>
+                                    <option value="🙂">🙂 不錯</option>
+                                    <option value="😐">😐 降低風險</option>
+                                    <option value="😨">😨 焦慮/害怕</option>
+                                    <option value="😡">😡 錯誤決策/生氣</option>
+                                </select>
+                            </div>
+                            <div class="form-col">
+                                <label for="journalIndexInput">已實現獲利 (選填)</label>
+                                <input type="number" id="journalIndexInput" placeholder="例如: 21500" step="0.01">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="journalTagsInput">筆記標籤 (用逗號隔開)</label>
+                            <input type="text" id="journalTagsInput" placeholder="加倉, 觀望, 停損, 等待機會...">
+                        </div>
+
+                        <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
+                            <label for="journalTradeNoteTextarea">投資心得與決策記錄</label>
+                            <textarea class="modal-textarea" id="journalTradeNoteTextarea"
+                                placeholder="今天發生了什麼事..."></textarea>
+                        </div>
+
                         <div class="modal-actions">
                             <button class="btn" id="journalTradeCancelNoteBtn">取消</button>
                             <button class="btn btn-primary" id="journalTradeSaveNoteBtn">儲存紀錄</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search Results Modal -->
+                <div id="journal-search-modal"
+                    style="z-index: 1000; display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--journal-modal-overlay); backdrop-filter: blur(5px);">
+                    <div class="modal-box"
+                        style="background: var(--journal-modal-bg); border: 1px solid rgba(255, 255, 255, 0.2); padding: 24px; border-radius: 12px; width: 90%; max-width: 650px; max-height: 90vh; display: flex; flex-direction: column;">
+                        <div class="modal-header"
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--journal-border-color);">
+                            <div class="modal-title" style="font-size: 20px; font-weight: bold; color: #fff;">搜尋結果</div>
+                            <button class="btn" id="journalSearchCloseBtn">關閉</button>
+                        </div>
+                        <div style="font-size:13px; color:var(--journal-text-muted); margin-bottom:12px;"
+                            id="journalSearchResultCount">
+                        </div>
+                        <div id="journalSearchResultsList" style="flex:1; overflow-y:auto; max-height: 50vh;">
+                            <!-- Results go here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monthly Summary Modal -->
+                <div id="journal-summary-modal"
+                    style="z-index: 1000; display: none; justify-content: center; align-items: center; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--journal-modal-overlay); backdrop-filter: blur(5px);">
+                    <div class="modal-box"
+                        style="background: var(--journal-modal-bg); border: 1px solid rgba(255, 255, 255, 0.2); padding: 24px; border-radius: 12px; width: 90%; max-width: 650px; max-height: 90vh; overflow-y: auto;">
+                        <div class="modal-header"
+                            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--journal-border-color);">
+                            <div class="modal-title" id="journalSummaryTitle"
+                                style="font-size: 20px; font-weight: bold; color: #fff;">本月回顧</div>
+                            <button class="btn" id="journalSummaryCloseBtn">關閉</button>
+                        </div>
+
+                        <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                            <div class="summary-stat-box"
+                                style="flex: 1; background: var(--journal-bg-input); border: 1px solid var(--journal-border-color); padding: 16px; border-radius: 8px; text-align: center;">
+                                <div class="summary-stat-value" id="summaryTotalDays"
+                                    style="font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 4px;">0</div>
+                                <div class="summary-stat-label"
+                                    style="font-size: 12px; color: var(--journal-text-muted);">紀錄天數</div>
+                            </div>
+                            <div class="summary-stat-box"
+                                style="flex: 1; background: var(--journal-bg-input); border: 1px solid var(--journal-border-color); padding: 16px; border-radius: 8px; text-align: center;">
+                                <div class="summary-stat-value" id="summaryTotalIndex"
+                                    style="font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 4px;">-</div>
+                                <div class="summary-stat-label"
+                                    style="font-size: 12px; color: var(--journal-text-muted);">累積已實現獲利</div>
+                            </div>
+                            <div class="summary-stat-box"
+                                style="flex: 1; background: var(--journal-bg-input); border: 1px solid var(--journal-border-color); padding: 16px; border-radius: 8px; text-align: center;">
+                                <div class="summary-stat-value" id="summaryTopMood"
+                                    style="font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 4px;">-</div>
+                                <div class="summary-stat-label"
+                                    style="font-size: 12px; color: var(--journal-text-muted);">最常出現心情</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label
+                                style="font-size:14px; font-weight:bold; color:#fff; border-bottom:1px solid #334155; padding-bottom:4px; display:block; margin-bottom:12px;">已實現獲利趨勢</label>
+                            <div
+                                style="background:var(--journal-bg-input); padding: 12px; border-radius: 8px; border: 1px solid var(--journal-border-color);">
+                                <canvas id="summaryIndexChart" width="400" height="200"
+                                    style="width:100%; max-height:220px;"></canvas>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label
+                                style="font-size:14px; font-weight:bold; color:#fff; border-bottom:1px solid #334155; padding-bottom:4px; display:block; margin-bottom:12px;">心情統計</label>
+                            <div id="summaryMoodCounts" style="display:flex; gap:16px; flex-wrap:wrap; font-size:16px;">
+                                <!-- Moods go here -->
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 20px;">
+                            <label
+                                style="font-size:14px; font-weight:bold; color:#fff; border-bottom:1px solid #334155; padding-bottom:4px; display:block; margin-bottom:12px;">熱門標籤</label>
+                            <div id="summaryTopTags" style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <!-- Tags go here -->
+                            </div>
                         </div>
                     </div>
                 </div>
