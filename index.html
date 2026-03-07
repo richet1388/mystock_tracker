@@ -8,6 +8,7 @@
     <link rel="icon" href="ElienOnly.ico" type="image/ico">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-auth-compat.js"></script>
@@ -167,7 +168,7 @@
 
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">Version 5</p>
+            <p class="mt-2 text-lg text-stone-400">Version 6</p>
         </header>
 
         <!-- Tab 切換列 -->
@@ -2812,7 +2813,31 @@
                 deleteNoteBtn: document.getElementById("journalTradeDeleteNoteBtn"),
                 textarea: document.getElementById("journalTradeNoteTextarea"),
                 cancelNoteBtn: document.getElementById("journalTradeCancelNoteBtn"),
-                saveNoteBtn: document.getElementById("journalTradeSaveNoteBtn")
+                saveNoteBtn: document.getElementById("journalTradeSaveNoteBtn"),
+
+                // Form Fields
+                moodSelect: document.getElementById("journalMoodSelect"),
+                indexInput: document.getElementById("journalIndexInput"),
+                tagsInput: document.getElementById("journalTagsInput"),
+
+                // Search & Summary
+                summaryBtn: document.getElementById("journalTradeSummaryBtn"),
+                searchInput: document.getElementById("journalTradeSearchInput"),
+                searchBtn: document.getElementById("journalTradeSearchBtn"),
+
+                searchModal: document.getElementById("journal-search-modal"),
+                searchCloseBtn: document.getElementById("journalSearchCloseBtn"),
+                searchResultCount: document.getElementById("journalSearchResultCount"),
+                searchResultsList: document.getElementById("journalSearchResultsList"),
+
+                summaryModal: document.getElementById("journal-summary-modal"),
+                summaryCloseBtn: document.getElementById("journalSummaryCloseBtn"),
+                summaryTitle: document.getElementById("journalSummaryTitle"),
+                summaryTotalDays: document.getElementById("summaryTotalDays"),
+                summaryTotalIndex: document.getElementById("summaryTotalIndex"),
+                summaryTopMood: document.getElementById("summaryTopMood"),
+                summaryMoodCounts: document.getElementById("summaryMoodCounts"),
+                summaryTopTags: document.getElementById("summaryTopTags")
             };
 
             const journalNow = new Date();
@@ -2826,6 +2851,15 @@
             let journalEditingDay = null;
 
             const JOURNAL_DEFAULT_TEMPLATE = `💰️`;
+
+            // Normalizes legacy string notes to the new object format { note, mood, index, tags }
+            function getNormalizedNoteData(dayData) {
+                if (!dayData) return null;
+                if (typeof dayData === 'string') {
+                    return { note: dayData, mood: '', index: '', tags: [] };
+                }
+                return dayData;
+            }
 
             // --- 日誌資料讀取/儲存 (使用 appData.journal + Firebase) ---
             function getJournalKey(year, monthIndex) {
@@ -2892,14 +2926,37 @@
                         cell.classList.add("is-today");
                     }
 
-                    const noteContent = journalCurrentMonthData[day] || "";
-                    if (noteContent) cell.classList.add("has-note");
+                    const noteData = getNormalizedNoteData(journalCurrentMonthData[day]);
+                    if (noteData) cell.classList.add("has-note");
 
-                    cell.innerHTML = `
-                        <div class="day-number">${day}</div>
-                        <div class="note-preview">${journalEscapeHtml(noteContent)}</div>
-                        <div class="more-indicator" title="還有更多內容..."></div>
-                    `;
+                    let innerHTML = `<div class="day-number">${day}</div>`;
+
+                    if (noteData) {
+                        // Render Top Info (Mood & Index)
+                        let infoContent = '';
+                        if (noteData.mood) {
+                            infoContent += `<span class="day-mood" title="心情">${noteData.mood}</span>`;
+                        }
+                        if (noteData.index) {
+                            infoContent += `<span class="day-index" title="已實現獲利">${noteData.index}</span>`;
+                        }
+                        if (infoContent) innerHTML += `<div>${infoContent}</div>`;
+
+                        // Render Tags
+                        if (noteData.tags && noteData.tags.length > 0) {
+                            innerHTML += `<div class="day-badges">`;
+                            noteData.tags.forEach(tag => {
+                                innerHTML += `<span class="day-badge">${journalEscapeHtml(tag)}</span>`;
+                            });
+                            innerHTML += `</div>`;
+                        }
+
+                        // Render Note Body
+                        innerHTML += `<div class="note-preview">${journalEscapeHtml(noteData.note)}</div>`;
+                    }
+
+                    innerHTML += `<div class="more-indicator" title="點擊編輯"></div>`;
+                    cell.innerHTML = innerHTML;
 
                     cell.addEventListener("click", () => openJournalModal(day));
                     grid.appendChild(cell);
@@ -2931,7 +2988,20 @@
             function openJournalModal(day) {
                 journalEditingDay = day;
                 journalEls.modalTitle.textContent = `${journalViewYear} 年 ${journalViewMonth + 1} 月 ${day} 日`;
-                journalEls.textarea.value = journalCurrentMonthData[day] || JOURNAL_DEFAULT_TEMPLATE;
+
+                const noteData = getNormalizedNoteData(journalCurrentMonthData[day]);
+                if (noteData) {
+                    journalEls.textarea.value = noteData.note || "";
+                    journalEls.moodSelect.value = noteData.mood || "";
+                    journalEls.indexInput.value = noteData.index || "";
+                    journalEls.tagsInput.value = (noteData.tags && noteData.tags.length > 0) ? noteData.tags.join(', ') : "";
+                } else {
+                    journalEls.textarea.value = JOURNAL_DEFAULT_TEMPLATE;
+                    journalEls.moodSelect.value = "";
+                    journalEls.indexInput.value = "";
+                    journalEls.tagsInput.value = "";
+                }
+
                 journalEls.modal.style.display = "flex";
                 journalEls.textarea.focus();
             }
@@ -2943,9 +3013,23 @@
 
             function saveJournalNote() {
                 if (journalEditingDay === null) return;
-                const text = journalEls.textarea.value.trim();
-                if (text) journalCurrentMonthData[journalEditingDay] = text;
-                else delete journalCurrentMonthData[journalEditingDay];
+
+                const note = journalEls.textarea.value.trim();
+                const mood = journalEls.moodSelect.value;
+                const index = journalEls.indexInput.value.trim();
+                const tagsRaw = journalEls.tagsInput.value.trim();
+
+                let tags = [];
+                if (tagsRaw) {
+                    tags = tagsRaw.split(',').map(t => t.trim()).filter(t => t.length > 0);
+                }
+
+                if (note || mood || index || tags.length > 0) {
+                    journalCurrentMonthData[journalEditingDay] = { note, mood, index, tags };
+                } else {
+                    delete journalCurrentMonthData[journalEditingDay];
+                }
+
                 saveJournalCurrentMonthData();
                 renderJournalCalendar();
                 closeJournalModal();
@@ -2957,12 +3041,239 @@
             journalEls.deleteNoteBtn.addEventListener("click", () => {
                 if (confirm("確定要清空這天的內容嗎？")) {
                     journalEls.textarea.value = "";
+                    journalEls.moodSelect.value = "";
+                    journalEls.indexInput.value = "";
+                    journalEls.tagsInput.value = "";
                     saveJournalNote();
                 }
             });
 
             journalEls.modal.addEventListener("click", (e) => {
                 if (e.target === journalEls.modal) saveJournalNote();
+            });
+
+            // === 搜尋功能 ===
+            function performSearch() {
+                const query = journalEls.searchInput.value.trim().toLowerCase();
+                if (!query) return;
+
+                let results = [];
+                if (appData.journal) {
+                    Object.keys(appData.journal).forEach(key => {
+                        const monthData = appData.journal[key];
+                        Object.keys(monthData).forEach(day => {
+                            const noteData = getNormalizedNoteData(monthData[day]);
+                            if (!noteData) return;
+
+                            const searchString = `${noteData.note || ''} ${noteData.mood || ''} ${noteData.index || ''} ${(noteData.tags || []).join(' ')}`.toLowerCase();
+
+                            if (searchString.includes(query)) {
+                                const [year, month] = key.split('-');
+                                results.push({
+                                    year: parseInt(year),
+                                    month: parseInt(month) - 1,
+                                    day: parseInt(day),
+                                    data: noteData
+                                });
+                            }
+                        });
+                    });
+                }
+
+                results.sort((a, b) => {
+                    const dateA = new Date(a.year, a.month, a.day);
+                    const dateB = new Date(b.year, b.month, b.day);
+                    return dateB - dateA; // newest first
+                });
+
+                journalEls.searchResultCount.textContent = `找到 ${results.length} 筆符合「${journalEls.searchInput.value}」的紀錄`;
+                journalEls.searchResultsList.innerHTML = "";
+
+                results.forEach(res => {
+                    const item = document.createElement("div");
+                    item.className = "search-result-item";
+
+                    let tagHtml = "";
+                    if (res.data.tags && res.data.tags.length > 0) {
+                        tagHtml = `<div class="day-badges" style="margin-top:4px;">` + res.data.tags.map(t => `<span class="day-badge" style="background:#475569;color:#e2e8f0;padding:2px 4px;border-radius:4px;font-size:10px;">${journalEscapeHtml(t)}</span>`).join('') + `</div>`;
+                    }
+
+                    item.innerHTML = `
+                        <div class="search-result-date">${res.year}/${res.month + 1}/${res.day} ${res.data.mood || ''} <span style="font-size:11px;color:#38bdf8;margin-left:4px;">${res.data.index ? '指數:' + res.data.index : ''}</span></div>
+                        <div class="search-result-note">${journalEscapeHtml(res.data.note)}</div>
+                        ${tagHtml}
+                    `;
+                    item.addEventListener("click", () => {
+                        journalEls.searchModal.style.display = "none";
+                        journalViewYear = res.year;
+                        journalViewMonth = res.month;
+                        renderJournalCalendar();
+                        openJournalModal(res.day);
+                    });
+                    journalEls.searchResultsList.appendChild(item);
+                });
+
+                journalEls.searchModal.style.display = "flex";
+            }
+
+            journalEls.searchBtn.addEventListener("click", performSearch);
+            journalEls.searchInput.addEventListener("keypress", (e) => {
+                if (e.key === 'Enter') performSearch();
+            });
+            journalEls.searchCloseBtn.addEventListener("click", () => {
+                journalEls.searchModal.style.display = "none";
+            });
+            journalEls.searchModal.addEventListener("click", (e) => {
+                if (e.target === journalEls.searchModal) journalEls.searchModal.style.display = "none";
+            });
+
+            // === 每月摘要及圖表 ===
+            let summaryChartInstance = null;
+
+            function generateMonthlySummary() {
+                journalEls.summaryTitle.textContent = `${journalViewYear} 年 ${journalViewMonth + 1} 月 回顧`;
+
+                const monthData = loadJournalMonthData(journalViewYear, journalViewMonth);
+                const days = Object.keys(monthData);
+
+                journalEls.summaryTotalDays.textContent = days.length;
+
+                let totalIndex = 0;
+                let indexCount = 0;
+                let moodCounts = {};
+                let tagCounts = {};
+
+                days.forEach(day => {
+                    const note = getNormalizedNoteData(monthData[day]);
+                    if (!note) return;
+
+                    if (note.index) {
+                        const idxVal = parseFloat(note.index);
+                        if (!isNaN(idxVal)) {
+                            totalIndex += idxVal;
+                            indexCount++;
+                        }
+                    }
+
+                    if (note.mood) {
+                        moodCounts[note.mood] = (moodCounts[note.mood] || 0) + 1;
+                    }
+
+                    if (note.tags) {
+                        note.tags.forEach(tag => {
+                            tagCounts[tag] = (tagCounts[tag] || 0) + 1;
+                        });
+                    }
+                });
+
+                if (indexCount > 0) {
+                    journalEls.summaryTotalIndex.textContent = Math.round(totalIndex);
+                } else {
+                    journalEls.summaryTotalIndex.textContent = "-";
+                }
+
+                const sortedMoods = Object.entries(moodCounts).sort((a, b) => b[1] - a[1]);
+                if (sortedMoods.length > 0) {
+                    journalEls.summaryTopMood.textContent = sortedMoods[0][0];
+                    journalEls.summaryMoodCounts.innerHTML = sortedMoods.map(m => `<span>${m[0]} × ${m[1]}天</span>`).join('');
+                } else {
+                    journalEls.summaryTopMood.textContent = "-";
+                    journalEls.summaryMoodCounts.innerHTML = `<span style="color:#94a3b8; font-size:13px;">無資料</span>`;
+                }
+
+                const sortedTags = Object.entries(tagCounts).sort((a, b) => b[1] - a[1]);
+                if (sortedTags.length > 0) {
+                    journalEls.summaryTopTags.innerHTML = sortedTags.map(t => `<span style="background:#475569;color:#e2e8f0;font-size:12px; padding:4px 8px;border-radius:4px;">${journalEscapeHtml(t[0])} <span style="opacity:0.7">(${t[1]})</span></span>`).join('');
+                } else {
+                    journalEls.summaryTopTags.innerHTML = `<span style="color:#94a3b8; font-size:13px;">無資料</span>`;
+                }
+
+                // Chart processing
+                let chartLabels = [];
+                let chartDataPoints = [];
+
+                const sortedDays = days.map(Number).sort((a, b) => a - b);
+                sortedDays.forEach(day => {
+                    const note = getNormalizedNoteData(monthData[day]);
+                    if (note && note.index) {
+                        const idxVal = parseFloat(note.index);
+                        if (!isNaN(idxVal)) {
+                            chartLabels.push(`${journalViewMonth + 1}/${day}`);
+                            chartDataPoints.push(idxVal);
+                        }
+                    }
+                });
+
+                const ctx = document.getElementById('summaryIndexChart').getContext('2d');
+                if (summaryChartInstance) {
+                    summaryChartInstance.destroy();
+                }
+
+                if (chartDataPoints.length > 0) {
+                    document.getElementById('summaryIndexChart').parentElement.style.display = 'block';
+
+                    const isPositiveTrend = chartDataPoints.length > 1 && (chartDataPoints[chartDataPoints.length - 1] >= chartDataPoints[0]);
+                    const lineColor = isPositiveTrend ? '#f87171' : '#4ade80';
+                    const bgColor = isPositiveTrend ? 'rgba(248, 113, 113, 0.1)' : 'rgba(74, 222, 128, 0.1)';
+
+                    summaryChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: chartLabels,
+                            datasets: [{
+                                label: '已實現獲利',
+                                data: chartDataPoints,
+                                borderColor: lineColor,
+                                backgroundColor: bgColor,
+                                borderWidth: 2,
+                                tension: 0.3,
+                                fill: true,
+                                pointBackgroundColor: lineColor,
+                                pointRadius: 4,
+                                pointHoverRadius: 6
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: { display: false },
+                                tooltip: {
+                                    backgroundColor: 'rgba(30,30,30,0.9)',
+                                    titleFont: { family: 'Inter', size: 13 },
+                                    bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
+                                    padding: 10,
+                                    cornerRadius: 4,
+                                    displayColors: false
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: { color: '#94a3b8', font: { family: 'Inter' } },
+                                    grid: { color: '#334155' }
+                                },
+                                x: {
+                                    ticks: { color: '#94a3b8', font: { family: 'Inter' } },
+                                    grid: { display: false }
+                                }
+                            }
+                        }
+                    });
+                } else {
+                    document.getElementById('summaryIndexChart').parentElement.style.display = 'none';
+                }
+
+                journalEls.summaryModal.style.display = "flex";
+            }
+
+            journalEls.summaryBtn.addEventListener("click", generateMonthlySummary);
+
+            journalEls.summaryCloseBtn.addEventListener("click", () => {
+                journalEls.summaryModal.style.display = "none";
+            });
+
+            journalEls.summaryModal.addEventListener("click", (e) => {
+                if (e.target === journalEls.summaryModal) journalEls.summaryModal.style.display = "none";
             });
 
             // --- 月份切換 ---
