@@ -150,7 +150,7 @@
 
 <body class="antialiased">
 
-    <div id="auth-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl text-center">
+    <div id="auth-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl text-center">
         <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈雲端儀表板📊</h1>
         <p class="mt-4 text-stone-400">使用 Google 帳戶登入以跨裝置同步持股資料</p>
         <button id="login-btn"
@@ -158,7 +158,7 @@
             Google 登入</button>
     </div>
 
-    <div id="app-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-5xl hidden">
+    <div id="app-container" class="container mx-auto p-4 sm:p-6 lg:p-8 max-w-7xl hidden">
 
         <div class="flex justify-between items-center mb-6">
             <p id="user-display" class="text-sm text-stone-400"></p>
@@ -219,7 +219,7 @@
                     }
 
                     #journal-trade-app .container {
-                        max-width: 1200px;
+                        max-width: 100%;
                         margin: 0 auto;
                     }
 
@@ -1044,9 +1044,18 @@
 
             // 監聽認證狀態變化 (程式的主要進入點)
             auth.onAuthStateChanged((user) => {
-                if (user) {
-                    // --- 使用者已登入 ---
-                    console.log("使用者已登入:", user.uid);
+                const urlParams = new URLSearchParams(window.location.search);
+                const isTestMode = urlParams.get('test') === '1';
+
+                if (user || isTestMode) {
+                    // --- 使用者已登入 或 進入測試模式 ---
+                    if (isTestMode) {
+                        console.log("[測試模式] 略過 Google 登入驗證");
+                        user = { uid: "test-user-001", displayName: "本地測試版", email: "test@localhost" };
+                    } else {
+                        console.log("使用者已登入:", user.uid);
+                    }
+
                     // 顯示主應用程式
                     appContainer.classList.remove('hidden');
                     // 隱藏登入區塊
@@ -1055,9 +1064,15 @@
                     userDisplay.textContent = `登入為: ${user.displayName || user.email}`;
                     logoutBtn.parentElement.classList.remove('hidden');
 
-                    // *** 觸發資料監聽器 ***
-                    // 這將會從 Firebase 載入該使用者的資料並啟動應用程式
-                    setupDataListener(user.uid);
+                    if (isTestMode) {
+                        // 測試模式下不連線 Firebase，直接使用空資料渲染 UI
+                        appData = { journal: {} };
+                        currentUid = user.uid;
+                        renderJournalCalendar();
+                    } else {
+                        // *** 觸發資料監聽器 ***
+                        setupDataListener(user.uid);
+                    }
 
                 } else {
                     // --- 使用者已登出 ---
