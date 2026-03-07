@@ -722,6 +722,10 @@
                                 <button class="btn btn-danger" id="journalTradeClearMonthBtn">🗑 清除本月</button>
                                 <button class="btn" id="journalTradePrivacyBtn">👁️ 顯示/隱藏</button>
 
+                                <button class="btn btn-primary" id="journalTradeExportBtn">⬇ 匯出</button>
+                                <label class="btn btn-primary">⬆ 匯入<input type="file" id="journalTradeImportInput"
+                                        accept=".json"></label>
+
                                 <div
                                     style="display:inline-flex; align-items:center; border: 1px solid var(--journal-border-color); border-radius:4px; padding:2px; background:var(--journal-bg-input);">
                                     <input type="text" id="journalTradeSearchInput" placeholder="搜尋日誌..."
@@ -729,10 +733,6 @@
                                     <button class="btn" id="journalTradeSearchBtn"
                                         style="padding:4px 8px; border:none; margin:0;">🔍</button>
                                 </div>
-
-                                <button class="btn btn-primary" id="journalTradeExportBtn">⬇ 匯出</button>
-                                <label class="btn btn-primary">⬆ 匯入<input type="file" id="journalTradeImportInput"
-                                        accept=".json"></label>
                             </div>
                         </div>
                         <div class="month-control">
@@ -777,18 +777,18 @@
                                 </select>
                             </div>
                             <div class="form-col">
-                                <label for="journalIndexInput">已實現獲利 (選填)</label>
+                                <label for="journalIndexInput">數字紀錄 (用來計算累積與趨勢圖)</label>
                                 <input type="number" id="journalIndexInput" placeholder="例如: 21500" step="0.01">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <label for="journalTagsInput">筆記標籤 (用逗號隔開)</label>
-                            <input type="text" id="journalTagsInput" placeholder="加倉, 觀望, 停損, 等待機會...">
+                            <input type="text" id="journalTagsInput" placeholder="加倉, 修剪枯枝,比重再平衡..">
                         </div>
 
                         <div class="form-group" style="flex: 1; display: flex; flex-direction: column;">
-                            <label for="journalTradeNoteTextarea">投資心得與決策記錄</label>
+                            <label for="journalTradeNoteTextarea">心得與決策記錄</label>
                             <textarea class="modal-textarea" id="journalTradeNoteTextarea"
                                 placeholder="今天發生了什麼事..."></textarea>
                         </div>
@@ -844,7 +844,7 @@
                                 <div class="summary-stat-value" id="summaryTotalIndex"
                                     style="font-size: 24px; font-weight: bold; color: #fff; margin-bottom: 4px;">-</div>
                                 <div class="summary-stat-label"
-                                    style="font-size: 12px; color: var(--journal-text-muted);">累積已實現獲利</div>
+                                    style="font-size: 12px; color: var(--journal-text-muted);">累積數字紀錄</div>
                             </div>
                             <div class="summary-stat-box"
                                 style="flex: 1; background: var(--journal-bg-input); border: 1px solid var(--journal-border-color); padding: 16px; border-radius: 8px; text-align: center;">
@@ -857,7 +857,7 @@
 
                         <div style="margin-bottom: 20px;">
                             <label
-                                style="font-size:14px; font-weight:bold; color:#fff; border-bottom:1px solid #334155; padding-bottom:4px; display:block; margin-bottom:12px;">已實現獲利趨勢</label>
+                                style="font-size:14px; font-weight:bold; color:#fff; border-bottom:1px solid #334155; padding-bottom:4px; display:block; margin-bottom:12px;">數字紀錄趨勢</label>
                             <div
                                 style="background:var(--journal-bg-input); padding: 12px; border-radius: 8px; border: 1px solid var(--journal-border-color);">
                                 <canvas id="summaryIndexChart" width="400" height="200"
@@ -1259,7 +1259,7 @@
                             infoContent += `<span class="day-mood" title="心情">${noteData.mood}</span>`;
                         }
                         if (noteData.index) {
-                            infoContent += `<span class="day-index" title="已實現獲利">${noteData.index}</span>`;
+                            infoContent += `<span class="day-index" title="數字紀錄">${noteData.index}</span>`;
                         }
                         if (infoContent) innerHTML += `<div>${infoContent}</div>`;
 
@@ -1542,7 +1542,7 @@
                         data: {
                             labels: chartLabels,
                             datasets: [{
-                                label: '已實現獲利',
+                                label: '當日數字紀錄',
                                 data: chartDataPoints,
                                 borderColor: lineColor,
                                 backgroundColor: bgColor,
