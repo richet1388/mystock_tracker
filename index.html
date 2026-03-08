@@ -168,14 +168,319 @@
 
         <header class="text-center mb-8">
             <h1 class="text-3xl sm:text-4xl font-bold text-stone-100 tracking-tight">📈儀表板📊</h1>
-            <p class="mt-2 text-lg text-stone-400">Version 6</p>
+            <p class="mt-2 text-lg text-stone-400">Version 7</p>
         </header>
 
 
 
+        <div class="flex justify-center space-x-4 mb-6">
+            <button id="tab-btn-options" class="tab-global-btn"
+                style="background-color: #44403c; border-color: #78716c;">🇺🇸Option</button>
+            <button id="tab-btn-journal" class="tab-global-btn">交易日誌</button>
+        </div>
+
+        <!-- 選擇權應用 -->
+        <main id="tab-options">
+            <div id="options-tracker-app">
+                <style>
+                    /* =========================================
+                       Options Tracker CSS (scoped to #options-tracker-app)
+                       ========================================= */
+                    #options-tracker-app {
+                        --opt-bg-panel: #1e293b;
+                        --opt-bg-input: #2f3633;
+                        --opt-text-main: #f1f5f9;
+                        --opt-border: #334155;
+                        --opt-danger: #ef4444;
+                        /* Red for Expiration <= 3 */
+                        --opt-warning: #f59e0b;
+                        /* Orange for Expiration <= 7 */
+                        --opt-expired: #64748b;
+                        /* Gray for expired (hidden generally) */
+                        --opt-success: #10b981;
+                        font-family: 'Inter', 'Microsoft JhengHei', sans-serif;
+                        color: var(--opt-text-main);
+                    }
+
+                    #options-tracker-app .stat-card {
+                        background: var(--opt-bg-panel);
+                        border: 1px solid var(--opt-border);
+                        border-radius: 8px;
+                        padding: 20px;
+                        text-align: center;
+                        margin-bottom: 24px;
+                        flex: 1;
+                    }
+
+                    #options-tracker-app .stat-card h3 {
+                        font-size: 14px;
+                        color: #94a3b8;
+                        margin-top: 0;
+                        margin-bottom: 8px;
+                    }
+
+                    #options-tracker-app .stat-card .value {
+                        font-size: 32px;
+                        font-weight: bold;
+                        color: #fff;
+                    }
+
+                    #options-tracker-app .contract-form {
+                        background: var(--opt-bg-panel);
+                        border: 1px solid var(--opt-border);
+                        border-radius: 8px;
+                        padding: 20px;
+                        margin-bottom: 24px;
+                    }
+
+                    #options-tracker-app .form-row {
+                        display: flex;
+                        gap: 16px;
+                        margin-bottom: 16px;
+                        flex-wrap: wrap;
+                    }
+
+                    #options-tracker-app .form-group {
+                        flex: 1;
+                        min-width: 150px;
+                    }
+
+                    #options-tracker-app label {
+                        display: block;
+                        font-size: 13px;
+                        margin-bottom: 6px;
+                        color: #cbd5e1;
+                    }
+
+                    #options-tracker-app input,
+                    #options-tracker-app select {
+                        width: 100%;
+                        padding: 8px 12px;
+                        background: var(--opt-bg-input);
+                        border: 1px solid var(--opt-border);
+                        border-radius: 4px;
+                        color: #fff;
+                        outline: none;
+                    }
+
+                    #options-tracker-app .btn-submit {
+                        background: #3b82f6;
+                        color: white;
+                        border: none;
+                        padding: 10px 20px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-weight: bold;
+                        transition: background 0.2s;
+                    }
+
+                    #options-tracker-app .btn-submit:hover {
+                        background: #2563eb;
+                    }
+
+                    #options-tracker-app .contract-list {
+                        display: grid;
+                        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+                        gap: 16px;
+                    }
+
+                    #options-tracker-app .contract-card {
+                        background: var(--opt-bg-panel);
+                        border: 1px solid var(--opt-border);
+                        border-radius: 8px;
+                        padding: 16px;
+                        position: relative;
+                        transition: transform 0.2s;
+                    }
+
+                    #options-tracker-app .contract-card:hover {
+                        transform: translateY(-2px);
+                    }
+
+                    #options-tracker-app .contract-card.danger {
+                        border-color: var(--opt-danger);
+                        box-shadow: 0 0 15px rgba(239, 68, 68, 0.4);
+                        background: rgba(239, 68, 68, 0.05);
+                        animation: pulse-danger 2s infinite;
+                    }
+
+                    @keyframes pulse-danger {
+                        0% {
+                            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+                        }
+
+                        50% {
+                            box-shadow: 0 0 20px rgba(239, 68, 68, 0.6);
+                        }
+
+                        100% {
+                            box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+                        }
+                    }
+
+                    #options-tracker-app .contract-card.danger::before {
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        height: 6px;
+                        background: var(--opt-danger);
+                        border-top-left-radius: 8px;
+                        border-top-right-radius: 8px;
+                    }
+
+                    #options-tracker-app .contract-card.warning {
+                        border-color: var(--opt-warning);
+                        box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+                    }
+
+                    #options-tracker-app .contract-card.expired {
+                        display: none;
+                        /* Hide expired cards entirely from the DOM visually */
+                    }
+
+                    #options-tracker-app .contract-title {
+                        font-size: 18px;
+                        font-weight: bold;
+                        margin-bottom: 12px;
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                    }
+
+                    #options-tracker-app .contract-type-badge {
+                        font-size: 12px;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        background: #475569;
+                    }
+
+                    #options-tracker-app .contract-detail {
+                        font-size: 14px;
+                        margin-bottom: 6px;
+                        display: flex;
+                        justify-content: space-between;
+                    }
+
+                    #options-tracker-app .contract-detail.dte {
+                        font-weight: bold;
+                        color: #cbd5e1;
+                        margin-top: 12px;
+                        padding-top: 12px;
+                        border-top: 1px solid var(--opt-border);
+                    }
+
+                    #options-tracker-app .danger .contract-detail.dte {
+                        color: var(--opt-danger);
+                    }
+
+                    #options-tracker-app .btn-delete {
+                        background: transparent;
+                        border: 1px solid var(--opt-danger);
+                        color: var(--opt-danger);
+                        padding: 4px 8px;
+                        border-radius: 4px;
+                        cursor: pointer;
+                        font-size: 12px;
+                        margin-top: 12px;
+                        width: 100%;
+                        transition: all 0.2s;
+                    }
+
+                    #options-tracker-app .btn-delete:hover {
+                        background: var(--opt-danger);
+                        color: white;
+                    }
+                </style>
+
+                <div style="display: flex; gap: 16px;">
+                    <div class="stat-card" style="flex: 1;">
+                        <h3>未平倉權利金 (Active Premium)</h3>
+                        <div class="value" id="opt-total-premium">$0</div>
+                    </div>
+                    <div class="stat-card" style="flex: 1;">
+                        <h3>已實現損益 (Realized P/L)</h3>
+                        <div class="value text-emerald-400" id="opt-realized-pl">$0</div>
+                    </div>
+                </div>
+
+                <details class="contract-form">
+                    <summary
+                        style="margin-top: 0; margin-bottom: 0; font-size: 18px; outline: none; cursor: pointer; font-weight: bold; list-style-position: inside;">
+                        新增選擇權部位</summary>
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px dashed var(--opt-border);">
+                        <form id="optAddForm">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>標的代號 (Symbol)</label>
+                                    <input type="text" id="optSymbol" placeholder="例如: AAPL" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>買賣方向</label>
+                                    <select id="optAction">
+                                        <option value="Sell">賣出 (Sell)</option>
+                                        <option value="Buy">買入 (Buy)</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>選擇權類型</label>
+                                    <select id="optType">
+                                        <option value="Put">Put</option>
+                                        <option value="Call">Call</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label>履約價 (Strike)</label>
+                                    <input type="number" step="0.5" id="optStrike" placeholder="150" required>
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>合約單位 (Quantity)</label>
+                                    <input type="number" step="any" id="optQuantity" value="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>目前價平 (ATM Strike)</label>
+                                    <input type="number" step="any" id="optAtmStrike" placeholder="例如: 150" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>到期日 (Expiration)</label>
+                                    <input type="date" id="optExpiryDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label>權利金/成本 (Premium)</label>
+                                    <input type="number" step="any" id="optPremium" placeholder="單位收付的權利金" required>
+                                </div>
+                                <div class="form-group" style="display: flex; align-items: flex-end;">
+                                    <button type="submit" class="btn-submit" style="width: 100%;">加入追蹤</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </details>
+
+                <h2
+                    style="font-size: 18px; margin-bottom: 16px; border-bottom: 1px solid var(--opt-border); padding-bottom: 8px;">
+                    未平倉合約 (Open Positions)</h2>
+                <div class="contract-list" id="optContractList">
+                    <!-- Cards will be injected here -->
+                </div>
+
+                <details style="margin-top: 32px; margin-bottom: 16px;">
+                    <summary
+                        style="font-size: 18px; font-weight: bold; cursor: pointer; border-bottom: 1px solid var(--opt-border); padding-bottom: 8px; list-style-position: inside; outline: none;">
+                        歷史資料 (Historical Data)
+                    </summary>
+                    <div class="contract-list" id="optHistoryList" style="margin-top: 16px;">
+                        <!-- Cards will be injected here -->
+                    </div>
+                </details>
+            </div>
+        </main>
 
         <!-- 日誌應用 -->
-        <div id="tab-journal">
+        <div id="tab-journal" class="hidden">
             <div id="journal-trade-app">
                 <style>
                     /* =========================================
@@ -978,17 +1283,25 @@
                         appData = storedData;
                     } else {
                         appData = {
-                            journal: {}
+                            journal: {},
+                            options: []
                         };
                         saveDataToFirebase();
                     }
 
-                    // --- 確保 journal 欄位存在 ---
+                    // --- 確保必要欄位存在 ---
                     if (!appData.journal) {
                         appData.journal = {};
                     }
+                    if (!appData.options) {
+                        appData.options = [];
+                    }
 
-                    renderJournalCalendar(); // 渲染日誌日曆
+                    if (typeof initialRenderAll === 'function') {
+                        initialRenderAll(); // 渲染所有已啟用模組
+                    } else {
+                        renderJournalCalendar(); // Fallback if not defined yet
+                    }
 
                 }, (error) => {
                     console.error("Firebase 資料讀取失敗:", error);
@@ -1011,7 +1324,10 @@
                 }
 
                 try {
-                    const dataToSave = JSON.parse(JSON.stringify({ journal: appData.journal || {} }));
+                    const dataToSave = JSON.parse(JSON.stringify({
+                        journal: appData.journal || {},
+                        options: appData.options || []
+                    }));
 
                     db.ref('users/' + currentUid + '/appData').set(dataToSave)
                         .catch((error) => {
@@ -1085,7 +1401,7 @@
 
                     if (isTestMode) {
                         // 測試模式下不連線 Firebase，直接使用空資料渲染 UI
-                        appData = { journal: {} };
+                        appData = { journal: {}, options: [] };
                         currentUid = user.uid;
                         renderJournalCalendar();
                     } else {
@@ -1687,6 +2003,247 @@
                     journalEls.privacyBtn.textContent = "👓️ 顯示/隱藏";
                 }
             });
+
+            // =============================================
+            // === 選擇權儀表板 (Options Tracker) 邏輯 ===
+            // =============================================
+            const tabBtnOptions = document.getElementById('tab-btn-options');
+            const tabBtnJournal = document.getElementById('tab-btn-journal');
+            const tabOptions = document.getElementById('tab-options');
+            const tabJournal = document.getElementById('tab-journal');
+
+            // --- 分頁切換 ---
+            tabBtnOptions.addEventListener('click', () => {
+                tabBtnOptions.style.backgroundColor = '#44403c';
+                tabBtnOptions.style.borderColor = '#78716c';
+
+                tabBtnJournal.style.backgroundColor = 'transparent';
+                tabBtnJournal.style.borderColor = 'transparent';
+
+                tabOptions.classList.remove('hidden');
+                tabJournal.classList.add('hidden');
+            });
+
+            tabBtnJournal.addEventListener('click', () => {
+                tabBtnJournal.style.backgroundColor = '#44403c';
+                tabBtnJournal.style.borderColor = '#78716c';
+
+                tabBtnOptions.style.backgroundColor = 'transparent';
+                tabBtnOptions.style.borderColor = 'transparent';
+
+                tabJournal.classList.remove('hidden');
+                tabOptions.classList.add('hidden');
+
+                // Re-render calendar when switching back to ensure correct dimensions
+                renderJournalCalendar();
+            });
+
+            // --- 選擇權 CRUD 邏輯 ---
+            const optAddForm = document.getElementById('optAddForm');
+            const optContractList = document.getElementById('optContractList');
+            const optHistoryList = document.getElementById('optHistoryList'); // 新增歷史資料區塊
+            const optTotalPremiumEl = document.getElementById('opt-total-premium');
+
+            function renderOptionsDashboard() {
+                optContractList.innerHTML = '';
+                if (optHistoryList) optHistoryList.innerHTML = '';
+                if (!appData.options) appData.options = [];
+
+                let totalPremium = 0;
+                let realizedPL = 0;
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                // Sort by expiration date automatically
+                appData.options.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+
+                appData.options.forEach((contract, index) => {
+                    const expiryDate = new Date(contract.expiry);
+                    // DTE Calculation (Days to Expiration)
+                    const diffTime = expiryDate - today;
+                    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+                    const isClosed = (contract.status === 'closed' || diffDays < 0);
+
+                    let cardClass = "contract-card";
+                    if (isClosed) {
+                        cardClass += " closed"; // 歷史資料可以加上不同 class 提供不同樣式
+                    } else if (diffDays <= 3) {
+                        cardClass += " danger";
+                    } else if (diffDays <= 7) {
+                        cardClass += " warning";
+                    }
+
+                    // Only add to total premium if not expired and not manually closed
+                    if (!isClosed) {
+                        const quantity = Number(contract.quantity) || 1;
+                        if (contract.action === "Sell") totalPremium += (Number(contract.premium) * quantity) || 0;
+                        if (contract.action === "Buy") totalPremium -= (Number(contract.premium) * quantity) || 0;
+                    }
+
+                    const actionColor = contract.action === "Sell" ? "text-emerald-400" : "text-rose-400";
+                    const actionSign = contract.action === "Sell" ? "+" : "-";
+
+                    const card = document.createElement('div');
+                    card.className = cardClass;
+                    const dteText = diffDays < 0 ? "已過期" : `${diffDays} 天`;
+
+                    let profitDisplay = '';
+                    if (isClosed) {
+                        const quantity = Number(contract.quantity) || 1;
+                        let profit = 0;
+                        if (contract.closePremium !== undefined) {
+                            if (contract.action === "Sell") profit = (contract.premium - contract.closePremium) * quantity;
+                            if (contract.action === "Buy") profit = (contract.closePremium - contract.premium) * quantity;
+                        } else {
+                            if (contract.action === "Sell") profit = contract.premium * quantity;
+                            if (contract.action === "Buy") profit = -(contract.premium * quantity);
+                        }
+                        realizedPL += profit;
+                        const profitColor = profit >= 0 ? "text-emerald-400" : "text-rose-400";
+                        const profitSign = profit >= 0 ? "+" : "";
+                        profitDisplay = `
+                            <div class="contract-detail" style="margin-top: 8px; border-top: 1px solid #334155; padding-top: 8px;">
+                                <span>實現損益 (P/L):</span>
+                                <span class="${profitColor} font-bold">${profitSign}$${profit}</span>
+                            </div>
+                        `;
+                    }
+
+                    let buttonsHtml = '';
+                    if (isClosed) {
+                        buttonsHtml = `<button class="btn-delete" data-index="${index}" style="margin-top: 12px; border-color: #64748b; color: #cbd5e1;">🗑 刪除紀錄</button>`;
+                    } else {
+                        buttonsHtml = `
+                            <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                <button class="btn-close-pos" data-index="${index}" style="flex: 1; background: #3b82f6; color: white; border: none; padding: 6px; border-radius: 4px; cursor: pointer; font-size: 13px;">🔒 平倉</button>
+                                <button class="btn-delete" data-index="${index}" style="flex: 1; margin-top: 0;">🗑 刪除</button>
+                            </div>
+                        `;
+                    }
+
+                    const isSellPut = contract.action === 'Sell' && contract.type === 'Put';
+                    const isBuyCall = contract.action === 'Buy' && contract.type === 'Call';
+                    const isSellCall = contract.action === 'Sell' && contract.type === 'Call';
+                    const isBuyPut = contract.action === 'Buy' && contract.type === 'Put';
+
+                    let badgeStyles = "";
+                    if (isSellPut) badgeStyles = "background-color: rgba(6, 78, 59, 0.4); color: #34d399; border-color: #059669;"; // Dark Green
+                    else if (isBuyCall) badgeStyles = "background-color: rgba(30, 58, 138, 0.4); color: #60a5fa; border-color: #2563eb;"; // Dark Blue
+                    else if (isSellCall) badgeStyles = "background-color: rgba(127, 29, 29, 0.4); color: #f87171; border-color: #b91c1c;"; // Dark Red
+                    else if (isBuyPut) badgeStyles = "background-color: rgba(124, 45, 18, 0.4); color: #fb923c; border-color: #ea580c;"; // Dark Orange
+
+                    card.innerHTML = `
+                        <div class="contract-title">
+                            <span>${journalEscapeHtml(contract.symbol)} <span style="font-size: 12px; color: #94a3b8; font-weight: normal; margin-left: 4px;">x${contract.quantity || 1}</span></span>
+                            <span class="contract-type-badge" style="${badgeStyles}">${contract.action} ${contract.type}</span>
+                        </div>
+                        <div class="contract-detail">
+                            <span>履約價 (Strike):</span>
+                            <span>${contract.strike} ${contract.atmStrike ? `<span style="color:#94a3b8; font-size:12px;">(價平: ${contract.atmStrike})</span>` : ''}</span>
+                        </div>
+                        <div class="contract-detail">
+                            <span>權利金 (Premium):</span>
+                            <span class="${actionColor}">${actionSign} $${contract.premium}</span>
+                        </div>
+                        <div class="contract-detail dte">
+                            <span>到期日: ${contract.expiry}</span>
+                            <span>DTE: ${dteText}</span>
+                        </div>
+                        ${profitDisplay}
+                        ${buttonsHtml}
+                    `;
+
+                    if (isClosed && optHistoryList) {
+                        optHistoryList.appendChild(card);
+                    } else {
+                        optContractList.appendChild(card);
+                    }
+                });
+
+                optTotalPremiumEl.textContent = `$${totalPremium.toLocaleString()}`;
+
+                const optRealizedPlEl = document.getElementById('opt-realized-pl');
+                if (optRealizedPlEl) {
+                    optRealizedPlEl.textContent = `${realizedPL >= 0 ? '+' : ''}$${realizedPL.toLocaleString()}`;
+                    if (realizedPL >= 0) {
+                        optRealizedPlEl.classList.add('text-emerald-400');
+                        optRealizedPlEl.classList.remove('text-rose-400');
+                    } else {
+                        optRealizedPlEl.classList.add('text-rose-400');
+                        optRealizedPlEl.classList.remove('text-emerald-400');
+                    }
+                }
+
+                // 綁定提前平倉按鈕
+                document.querySelectorAll('.btn-close-pos').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = e.target.getAttribute('data-index');
+                        const val = prompt(`請輸入 ${journalEscapeHtml(appData.options[idx].symbol)} 提前平倉所花費/收取的權利金點數 (例如: 0.5):`);
+                        if (val !== null && val.trim() !== "") {
+                            const cost = parseFloat(val) * 100;
+                            if (!isNaN(cost)) {
+                                appData.options[idx].status = 'closed';
+                                appData.options[idx].closePremium = cost;
+                                saveDataToFirebase();
+                                renderOptionsDashboard();
+                            } else {
+                                alert("請輸入有效的數字！");
+                            }
+                        }
+                    });
+                });
+
+                // 綁定刪除按鈕
+                document.querySelectorAll('.btn-delete').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const idx = e.target.getAttribute('data-index');
+                        if (confirm(`確定要將這筆 ${journalEscapeHtml(appData.options[idx].symbol)} 選擇權紀錄從系統徹底刪除嗎？`)) {
+                            appData.options.splice(idx, 1);
+                            saveDataToFirebase();
+                            renderOptionsDashboard();
+                        }
+                    });
+                });
+            }
+
+            optAddForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Optional: Multiply by 100 since 1 contract usually represents 100 shares 
+                // However, they requested typing '1' means actually '100'.
+                const inputPremium = parseFloat(document.getElementById('optPremium').value) || 0;
+                const calculatedPremium = inputPremium * 100;
+
+                const quantity = parseFloat(document.getElementById('optQuantity').value) || 1;
+
+                const atmStrikeRaw = document.getElementById('optAtmStrike');
+
+                const newContract = {
+                    symbol: document.getElementById('optSymbol').value.toUpperCase(),
+                    action: document.getElementById('optAction').value,
+                    type: document.getElementById('optType').value,
+                    strike: document.getElementById('optStrike').value,
+                    atmStrike: atmStrikeRaw ? atmStrikeRaw.value : '',
+                    expiry: document.getElementById('optExpiryDate').value,
+                    premium: calculatedPremium,
+                    quantity: quantity,
+                    status: 'active',
+                    createdAt: new Date().toISOString()
+                };
+
+                if (!appData.options) appData.options = [];
+                appData.options.push(newContract);
+
+                saveDataToFirebase();
+                renderOptionsDashboard();
+                optAddForm.reset();
+            });
+
+            // Initial setup render
+            function initialRenderAll() {
+                renderJournalCalendar();
+                renderOptionsDashboard();
+            }
 
             if (isTestMode) {
                 // 測試模式直接觸發登入邏輯
